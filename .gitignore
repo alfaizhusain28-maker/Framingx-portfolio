@@ -1,0 +1,23 @@
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup / Large Original Assets (Over 100MB)
+*.original.mp4
+
+# Unused draft videos not referenced in the portfolio
+Ear buds.mp4
+Headphone.mp4
+Mamaearth.mp4
+Man_turning_head_*.mp4
+Peanut butter.mp4
+Protein shake.mp4
+
+# Temp / Scratch folders
+scratch/
+.system_generated/
