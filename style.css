@@ -1412,6 +1412,99 @@ body {
   flex-wrap: wrap;
 }
 
+/* Primary Calendly "Book a Call" Button (Red Accent Theme matching site design) */
+.btn-book-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: var(--accent-red);
+  color: #ffffff;
+  padding: 0.85rem 1.85rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border: 1px solid var(--accent-red);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(230, 57, 70, 0.38);
+  transition: transform 0.25s var(--ease-cinematic), box-shadow 0.25s var(--ease-cinematic), background-color 0.25s, border-color 0.25s;
+}
+
+.btn-book-call:hover {
+  background: var(--accent-red-bright);
+  border-color: var(--accent-red-bright);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(230, 57, 70, 0.55);
+}
+
+.btn-book-call:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.1s;
+}
+
+.btn-book-call svg {
+  stroke: #ffffff;
+  transition: transform 0.25s var(--ease-cinematic);
+}
+
+.btn-book-call:hover svg {
+  transform: scale(1.08);
+}
+
+/* Secondary WhatsApp Button in Schedule Section */
+.btn-whatsapp-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  padding: 0.85rem 1.85rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-cinematic), box-shadow 0.25s var(--ease-cinematic), background-color 0.25s, border-color 0.25s;
+}
+
+.btn-whatsapp-secondary:hover {
+  background: rgba(37, 211, 102, 0.08);
+  border-color: rgba(37, 211, 102, 0.45);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.2);
+}
+
+.btn-whatsapp-secondary:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.1s;
+}
+
+.btn-whatsapp-secondary svg {
+  fill: #25d366;
+  transition: transform 0.25s var(--ease-cinematic);
+}
+
+.btn-whatsapp-secondary:hover svg {
+  transform: scale(1.08);
+}
+
+/* Calendly Popup Widget Styles & Modal Isolation */
+.calendly-overlay {
+  z-index: 999999 !important;
+}
+
+.calendly-overlay .calendly-popup {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
 /* --------------------------------------------------------------------------
    9. FOOTER
    -------------------------------------------------------------------------- */

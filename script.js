@@ -1248,12 +1248,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Calendly Placeholder Handler
+  // Calendly Official Popup Widget Handler
   const btnOpenCalendly = document.getElementById('btn-open-calendly');
   if (btnOpenCalendly) {
     btnOpenCalendly.addEventListener('click', (e) => {
       e.preventDefault();
-      window.open('https://wa.me/918209856985?text=Hi%20Alfaiz,%20I%20would%20like%20to%20book%20a%20call%20for%20a%20cinematic%20AI%20commercial.', '_blank');
+      const calendlyUrl = 'https://calendly.com/alfaizhusain28/30min';
+      if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+        window.Calendly.initPopupWidget({ url: calendlyUrl });
+      } else {
+        window.open(calendlyUrl, '_blank', 'noopener,noreferrer');
+      }
     });
   }
 
