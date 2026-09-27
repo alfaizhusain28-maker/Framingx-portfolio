@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${encodeURI(FOLDER_NAME)}/frame_${num}_${sec}s.png`;
   }
 
-  // Preload frames
+  // Preload frames with background off-thread decoding for zero stutter during scrub
   function preloadFrames() {
     if (isMobileLayout()) {
       dismissLoader();
@@ -238,11 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
     firstImg.src = getFramePath(1);
     images[1] = firstImg;
     firstImg.onload = () => {
-      loadedCount++;
-      updateLoader();
-      resizeCanvas();
-      renderFrame(1);
-      loadRemainingFrames();
+      const onDone = () => {
+        loadedCount++;
+        updateLoader();
+        resizeCanvas();
+        renderFrame(1);
+        loadRemainingFrames();
+      };
+      if (firstImg.decode) {
+        firstImg.decode().then(onDone).catch(onDone);
+      } else {
+        onDone();
+      }
     };
     firstImg.onerror = () => {
       console.warn('Failed to load initial frame:', firstImg.src);
@@ -256,9 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = getFramePath(i);
       images[i] = img;
 
-      img.onload = () => {
+      const onDone = () => {
         loadedCount++;
         updateLoader();
+      };
+
+      img.onload = () => {
+        if (img.decode) {
+          img.decode().then(onDone).catch(onDone);
+        } else {
+          onDone();
+        }
       };
       img.onerror = () => {
         loadedCount++;
@@ -341,10 +356,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const vRatio = cH / imgH;
     const ratio = Math.max(hRatio, vRatio);
 
-    const drawW = imgW * ratio;
-    const drawH = imgH * ratio;
-    const drawX = (cW - drawW) / 2;
-    const drawY = (cH - drawH) / 2;
+    const drawW = Math.round(imgW * ratio);
+    const drawH = Math.round(imgH * ratio);
+    const drawX = Math.round((cW - drawW) / 2);
+    const drawY = Math.round((cH - drawH) / 2);
 
     ctx.drawImage(img, 0, 0, imgW, imgH, drawX, drawY, drawW, drawH);
   }
@@ -412,15 +427,13 @@ document.addEventListener('DOMContentLoaded', () => {
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
-        scrub: 0.1,
+        scrub: 0.05,
         fastScrollEnd: true,
         preventOverlaps: true,
         onUpdate: (self) => {
           const p = Math.max(0, Math.min(1, self.progress));
-          const frameIndex = 1 + Math.round(p * (midFrame - 1));
+          const frameIndex = 1 + p * (midFrame - 1);
           targetFrame = Math.max(1, Math.min(midFrame, frameIndex));
-          currentRenderedFrame = targetFrame;
-          renderFrame(targetFrame);
         }
       });
 
@@ -430,18 +443,14 @@ document.addEventListener('DOMContentLoaded', () => {
         trigger: '#hero',
         start: () => (heroPinTrigger ? heroPinTrigger.end : getPinDistance()),
         end: () => `+=${getUnpinnedDistance()}`,
-        scrub: 0.1,
+        scrub: 0.05,
         onUpdate: (self) => {
           if (self.progress > 0) {
             const p = Math.max(0, Math.min(1, self.progress));
-            const frameIndex = midFrame + Math.round(p * (FRAME_COUNT - midFrame));
+            const frameIndex = midFrame + p * (FRAME_COUNT - midFrame);
             targetFrame = Math.max(midFrame, Math.min(FRAME_COUNT, frameIndex));
-            currentRenderedFrame = targetFrame;
-            renderFrame(targetFrame);
           } else if (self.direction === -1 && self.progress <= 0) {
             targetFrame = midFrame;
-            currentRenderedFrame = targetFrame;
-            renderFrame(targetFrame);
           }
         }
       });
@@ -457,17 +466,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Render Loop (Desktop only)
-  function animationLoop() {
-    if (!heroScrollTrigger && !isMobileLayout()) {
-      const delta = (targetFrame - currentRenderedFrame) * 0.35;
-      currentRenderedFrame += delta;
+  let lastDrawnFrame = -1;
 
-      if (Math.abs(targetFrame - currentRenderedFrame) < 0.05) {
+  // Render Loop (Desktop only) with requestAnimationFrame & butter-smooth LERP
+  function animationLoop() {
+    if (!isMobileLayout()) {
+      const diff = targetFrame - currentRenderedFrame;
+      if (Math.abs(diff) > 0.005) {
+        currentRenderedFrame += diff * 0.28;
+      } else {
         currentRenderedFrame = targetFrame;
       }
 
-      renderFrame(Math.round(currentRenderedFrame));
+      const frameToDraw = Math.round(currentRenderedFrame);
+      if (frameToDraw !== lastDrawnFrame) {
+        renderFrame(frameToDraw);
+        lastDrawnFrame = frameToDraw;
+      }
     }
     requestAnimationFrame(animationLoop);
   }
@@ -485,16 +500,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (heroScrollDistance > 0) {
         if (scrollY <= heroScrollDistance) {
           const progress = Math.max(0, Math.min(1, scrollY / heroScrollDistance));
-          targetFrame = 1 + Math.round(progress * (FRAME_COUNT - 1));
+          targetFrame = 1 + progress * (FRAME_COUNT - 1);
         } else {
           targetFrame = FRAME_COUNT;
         }
-        currentRenderedFrame = targetFrame;
-        renderFrame(targetFrame);
       }
     }
 
-    // 1. Throttled with requestAnimationFrame for maximum performance
+    // Throttled with requestAnimationFrame for maximum performance
     if (!isNavTicking) {
       requestAnimationFrame(() => {
         updateActiveNav();
@@ -522,8 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
         link.classList.remove('active');
       }
     });
-
-    console.log(`[Nav Active] Center point detected section: ${targetId}`);
   }
 
   function updateActiveNav() {
@@ -586,17 +597,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gsap.fromTo(
           items,
-          { opacity: 0, y: 30 },
+          { opacity: 0, y: 24 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.75,
+            duration: 0.65,
             ease: 'power2.out',
-            stagger: 0.12,
-            clearProps: 'transform',
+            stagger: 0.08,
+            clearProps: 'transform,will-change',
+            onStart: () => {
+              items.forEach(el => el.style.willChange = 'opacity, transform');
+            },
+            onComplete: () => {
+              items.forEach(el => {
+                el.style.willChange = 'auto';
+                el.classList.add('is-revealed');
+              });
+            },
             scrollTrigger: {
               trigger: section,
-              start: 'top 85%',
+              start: 'top 88%',
               once: true
             }
           }
@@ -617,6 +637,30 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el));
+    }
+  }
+
+  // Lazy-warmup videos below the fold when user scrolls near the showreel section
+  function initVideoLazyLoading() {
+    const videoSlots = document.querySelectorAll('.showreel-bento-grid video');
+    if (!videoSlots.length) return;
+
+    if ('IntersectionObserver' in window) {
+      const videoObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const vid = entry.target;
+            if (vid.getAttribute('preload') === 'none') {
+              vid.setAttribute('preload', 'metadata');
+            }
+            obs.unobserve(vid);
+          }
+        });
+      }, { rootMargin: '400px 0px 400px 0px' });
+
+      videoSlots.forEach(v => videoObserver.observe(v));
+    } else {
+      videoSlots.forEach(v => v.setAttribute('preload', 'metadata'));
     }
   }
 
@@ -1245,6 +1289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     preloadFrames();
     initHeroScrollPin();
   }
+  initVideoLazyLoading();
   updateActiveNav();
   requestAnimationFrame(animationLoop);
 
