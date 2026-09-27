@@ -21,3 +21,4 @@ Protein shake.mp4
 # Temp / Scratch folders
 scratch/
 .system_generated/
+.python_modules/

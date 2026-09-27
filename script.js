@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const FRAME_COUNT = 81;
-  const FOLDER_NAME = 'My vid';
+  const FOLDER_NAME = 'assets/all photos/My vid';
 
   // DOM Elements
   const canvas = document.getElementById('hero-canvas');
@@ -43,64 +43,64 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'v1',
       title: 'Chocolate Protein Shake',
       category: 'Food & Fitness',
-      videoSrc: 'Chocolate protien shake.mp4',
-      poster: 'thumbnails/chocolate_shake.png',
+      videoSrc: 'assets/all vid/Chocolate protien shake.mp4',
+      poster: 'assets/all photos/chocolate_shake.webp',
       desc: 'Dynamic fitness campaign ad featuring rich fluid simulations, athletic motion, and bold typographic overlays.'
     },
     {
       id: 'v2',
       title: 'Lip Balm',
       category: 'Beauty & Care',
-      videoSrc: 'Lip balm.mp4',
-      poster: 'thumbnails/lip_balm.jpeg',
+      videoSrc: 'assets/all vid/Lip balm.mp4',
+      poster: 'assets/all photos/lip_balm.webp',
       desc: 'Radiant micro-detail cosmetic advertisement highlighting product purity, viscosity, and skin texture.'
     },
     {
       id: 'v3',
       title: 'Luxury Perfume',
       category: 'Luxury Fragrance',
-      videoSrc: 'Luxury perfume.mp4',
-      poster: 'thumbnails/luxury_perfume.jpg',
+      videoSrc: 'assets/all vid/Luxury perfume.mp4',
+      poster: 'assets/all photos/luxury_perfume.webp',
       desc: 'Moody twilight fragrance commercial featuring velvet shadows, particulate physics, and glass caustics.'
     },
     {
       id: 'v4',
       title: 'Lemon Juice',
       category: 'Food & Beverage',
-      videoSrc: 'Lemon juise.mp4',
-      poster: 'thumbnails/lemon_juice.jpeg',
+      videoSrc: 'assets/all vid/Lemon juise.mp4',
+      poster: 'assets/all photos/lemon_juice.webp',
       desc: 'Hyper-fluid beverage commercial with macro droplets, ice refraction, and cinematic pour dynamics.'
     },
     {
       id: 'v5',
       title: 'Jewellery Commercial',
       category: 'Fashion & Jewelry',
-      videoSrc: 'Jwellery commercial.mp4',
-      poster: 'thumbnails/jewelry.jpeg',
+      videoSrc: 'assets/all vid/Jwellery commercial.mp4',
+      poster: 'assets/all photos/jewelry.webp',
       desc: 'Exquisite cinematic commercial showcasing fine jewelry craftsmanship, brilliant light refractions, and precious stones.'
     },
     {
       id: 'v6',
       title: 'Perfume',
       category: 'Perfume',
-      videoSrc: 'Perfume .mp4',
-      poster: 'thumbnails/perfume_alt.jpeg',
+      videoSrc: 'assets/all vid/Perfume .mp4',
+      poster: 'assets/all photos/perfume_alt.webp',
       desc: 'Sensory fragrance commercial exploring floral notes, warm amber lighting, and elegant liquid motion.'
     },
     {
       id: 'v7',
       title: 'UGC',
       category: 'Food',
-      videoSrc: 'UGC video.mp4',
-      poster: 'thumbnails/ugc_video.jpg',
+      videoSrc: 'assets/all vid/UGC video.mp4',
+      poster: 'assets/all photos/ugc_video.webp',
       desc: 'High-energy vertical UGC commercial designed for TikTok and Instagram Reels with rapid pacing and authentic hooks.'
     },
     {
       id: 'v8',
       title: 'Architect AI Villa',
       category: 'Architecture',
-      videoSrc: 'AI villa edit.mp4',
-      poster: 'thumbnails/ai_villa.png',
+      videoSrc: 'assets/all vid/AI villa edit.mp4',
+      poster: 'assets/all photos/ai_villa.webp',
       desc: 'Photorealistic AI architectural walkthrough with cinematic twilight atmosphere and monumental concrete geometry.'
     }
   ];
@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'food',
       tag: 'Food & Beverage',
       title: 'Dark Fantasy',
-      videoSrc: 'Dark fantasy.mp4',
-      poster: '',
+      videoSrc: 'assets/all vid/Dark fantasy.mp4',
+      poster: 'assets/all photos/Dark fantasy.webp',
       desc: 'Cinematic chocolate cookie commercial with rich molten core dynamics and fluid chocolate pours.'
     },
     {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: ['ugc', 'tech'],
       tag: 'UGC Video',
       title: 'Unboxing UGC2',
-      videoSrc: 'Unboxing UGC 2.mp4',
+      videoSrc: 'assets/all vid/Unboxing UGC 2.mp4',
       poster: '',
       desc: 'Authentic creator-style unboxing video highlighting product reveal, tactile details, and modern social format.'
     },
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: ['ugc', 'tech'],
       tag: 'Product Campaign',
       title: 'Product Unboxing',
-      videoSrc: 'product unboxing.mp4',
+      videoSrc: 'assets/all vid/product unboxing.mp4',
       poster: '',
       desc: 'Cinematic product unboxing showcase capturing packaging reveal, tactile textures, and sleek presentation.'
     },
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'tech',
       tag: 'Tech & Electronics',
       title: 'Keyboard',
-      videoSrc: 'Keyboard.mp4',
+      videoSrc: 'assets/all vid/Keyboard.mp4',
       poster: '',
       desc: 'High-performance mechanical keyboard advertisement showcasing tactile key switches, anodized chassis, and lighting.'
     },
@@ -148,8 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: ['luxury', 'fashion'],
       tag: 'Luxury Items',
       title: 'Luxury Watch',
-      videoSrc: 'Luxury watch.mp4',
-      poster: 'thumbnails/luxury_watch.jpeg',
+      videoSrc: 'assets/all vid/Luxury watch.mp4',
+      poster: 'assets/all photos/luxury_watch.webp',
       desc: 'High-horology timepiece commercial featuring intricate tourbillon movement, sapphire crystal refractions, and rose gold detailing.'
     },
     {
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'food',
       tag: 'Food & Beverage',
       title: 'Drink Hypermotion',
-      videoSrc: 'Drink Hypermotion.mp4',
+      videoSrc: 'assets/all vid/Drink Hypermotion.mp4',
       poster: '',
       desc: 'Dynamic hypermotion beverage commercial with fluid splash physics, macro ice dynamics, and cinematic lighting.'
     },
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'ugc',
       tag: 'UGC Video',
       title: 'UGC Unboxing',
-      videoSrc: 'Unboxing UGC.mp4',
+      videoSrc: 'assets/all vid/Unboxing UGC.mp4',
       poster: '',
       desc: 'High-converting social UGC unboxing review highlighting unboxing experience, texture, and product hook.'
     },
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'fashion',
       tag: 'Fashion & Apparel',
       title: 'Fashion Clothing',
-      videoSrc: 'Fashion clothing.mp4',
+      videoSrc: 'assets/all vid/Fashion clothing.mp4',
       poster: '',
       desc: 'High-fashion apparel commercial with editorial styling, fluid fabric motion, and contemporary aesthetic.'
     },
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cat: 'food',
       tag: 'Food & Beverage',
       title: 'Yoga Bar',
-      videoSrc: 'Yoga bar.mp4',
+      videoSrc: 'assets/all vid/Yoga bar.mp4',
       poster: '',
       desc: 'Healthy energy bar commercial capturing natural whole grains, honey drizzle, and wholesome outdoor vitality.'
     }
@@ -192,20 +192,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Photography Database for Categorized Gallery Modal
   const photographyProjects = [
-    { cat: 'fashion', title: 'Studio Portrait', tag: 'Fashion & Jewelry', img: 'All Photos/Hyper realistic.png' },
-    { cat: 'fashion', title: 'Contemporary Apparel', tag: 'Fashion & Jewelry', img: 'All Photos/clothing 1.jpeg' },
-    { cat: 'fashion', title: 'Footwear Design', tag: 'Fashion & Jewelry', img: 'All Photos/shoes.jpeg' },
-    { cat: 'fashion', title: 'Editorial Model', tag: 'Fashion & Jewelry', img: 'All Photos/Hyper realistic 3.png' },
-    { cat: 'fashion', title: 'Urban Silhouette', tag: 'Fashion & Jewelry', img: 'All Photos/clothing 2.jpeg' },
-    { cat: 'fashion', title: 'Street Candid', tag: 'Fashion & Jewelry', img: 'All Photos/fashion candit.png' },
-    { cat: 'luxury', title: 'Diamond Solitaire', tag: 'Luxury Items', img: 'All Photos/Ring.jpeg' },
-    { cat: 'luxury', title: 'Oud Ameer Perfume', tag: 'Luxury Items', img: 'All Photos/oud ameer.jpeg' },
-    { cat: 'luxury', title: 'Royal Jewellery', tag: 'Luxury Items', img: 'All Photos/Jwellery 2.png' },
-    { cat: 'luxury', title: 'Diamond Necklace', tag: 'Luxury Items', img: 'All Photos/Jwellery 1.png' },
-    { cat: 'beauty', title: 'Beauty Portrait', tag: 'Beauty & Makeup', img: 'All Photos/Hyper realistic 2.png' },
-    { cat: 'beauty', title: 'Chemist at Play', tag: 'Beauty & Makeup', img: 'All Photos/Camist&play.jpeg' },
-    { cat: 'food', title: 'Citrus Splash', tag: 'Food & Beverage', img: 'All Photos/soft drink.png' },
-    { cat: 'food', title: 'Dark Fantasy', tag: 'Food & Beverage', img: 'All Photos/Dark fantasy.jpeg' }
+    { cat: 'fashion', title: 'Studio Portrait', tag: 'Fashion & Jewelry', img: 'assets/all photos/Hyper realistic.webp' },
+    { cat: 'fashion', title: 'Contemporary Apparel', tag: 'Fashion & Jewelry', img: 'assets/all photos/clothing 1.webp' },
+    { cat: 'fashion', title: 'Footwear Design', tag: 'Fashion & Jewelry', img: 'assets/all photos/shoes.webp' },
+    { cat: 'fashion', title: 'Editorial Model', tag: 'Fashion & Jewelry', img: 'assets/all photos/Hyper realistic 3.webp' },
+    { cat: 'fashion', title: 'Urban Silhouette', tag: 'Fashion & Jewelry', img: 'assets/all photos/clothing 2.webp' },
+    { cat: 'fashion', title: 'Street Candid', tag: 'Fashion & Jewelry', img: 'assets/all photos/fashion candit.webp' },
+    { cat: 'luxury', title: 'Diamond Solitaire', tag: 'Luxury Items', img: 'assets/all photos/Ring.webp' },
+    { cat: 'luxury', title: 'Oud Ameer Perfume', tag: 'Luxury Items', img: 'assets/all photos/oud ameer.webp' },
+    { cat: 'luxury', title: 'Royal Jewellery', tag: 'Luxury Items', img: 'assets/all photos/Jwellery 2.webp' },
+    { cat: 'luxury', title: 'Diamond Necklace', tag: 'Luxury Items', img: 'assets/all photos/Jwellery 1.webp' },
+    { cat: 'beauty', title: 'Beauty Portrait', tag: 'Beauty & Makeup', img: 'assets/all photos/Hyper realistic 2.webp' },
+    { cat: 'beauty', title: 'Chemist at Play', tag: 'Beauty & Makeup', img: 'assets/all photos/Camist&play.webp' },
+    { cat: 'food', title: 'Citrus Splash', tag: 'Food & Beverage', img: 'assets/all photos/soft drink.webp' },
+    { cat: 'food', title: 'Dark Fantasy', tag: 'Food & Beverage', img: 'assets/all photos/Dark fantasy.webp' }
   ];
 
   // State
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getFramePath(index) {
     const num = String(index).padStart(4, '0');
     const sec = ((index - 1) * 0.1).toFixed(2);
-    return `${encodeURI(FOLDER_NAME)}/frame_${num}_${sec}s.png`;
+    return `${encodeURI(FOLDER_NAME)}/frame_${num}_${sec}s.webp`;
   }
 
   // Preload frames with background off-thread decoding for zero stutter during scrub
