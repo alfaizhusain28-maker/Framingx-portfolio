@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'v5',
       title: 'Jewellery Commercial',
       category: 'Fashion & Jewelry',
-      videoSrc: 'assets/all vid/Jwellery commercial.mp4',
+      videoSrc: 'assets/all vid/jewellery-commercial.mp4',
       poster: 'assets/all photos/jewelry.webp',
       desc: 'Exquisite cinematic commercial showcasing fine jewelry craftsmanship, brilliant light refractions, and precious stones.'
     },
