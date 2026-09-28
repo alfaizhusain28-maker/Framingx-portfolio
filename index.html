@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FramingX AI — Cinematic AI Video & Commercial Producer | Alfaiz</title>
+  
+  <!-- Fonts & CDN Preconnects -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap">
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@700&display=swap">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Preloader Screen -->
+  <div id="preloader" class="preloader">
+    <div class="loader-content">
+      <div class="loader-brand">
+        <span class="logo-red-dot"></span> FramingX AI
+      </div>
+      <div class="loader-bar-track">
+        <div id="loader-bar" class="loader-bar-fill"></div>
+      </div>
+      <div class="loader-meta">
+        <span class="mono" id="loader-status">Initializing AI Engine</span>
+        <span class="mono" id="loader-percent">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSISTENT BACKGROUND CANVAS (Fixed behind entire site) -->
+  <div class="global-canvas-wrap" id="canvas-wrapper">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-canvas-vignette"></div>
+  </div>
+
+  <!-- NAVIGATION BAR (Floating pill matching reference) -->
+  <header class="site-header" id="site-header">
+    <a href="#hero" class="nav-logo">
+      <span class="logo-bullet"></span>
+      <span class="logo-name">FramingX <span class="accent-text">AI</span></span>
+    </a>
+
+    <nav class="nav-menu" aria-label="Main Navigation">
+      <a href="#hero" class="nav-item active">Home</a>
+      <a href="#work" class="nav-item">Work</a>
+      <a href="#faq" class="nav-item">FAQ</a>
+      <a href="#contact" class="nav-item">Contact</a>
+    </nav>
+
+    <div class="nav-cta-wrapper">
+      <a href="https://wa.me/918209856985" target="_blank" rel="noopener noreferrer" class="pill-btn nav-pill">
+        <span>Get in Touch</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO SECTION WITH SCROLL-PINNED CANVAS TRACK -->
+  <section class="hero-scroll-track" id="hero">
+    <!-- Static Hero Background for Mobile (<= 768px, no scroll-scrub) -->
+    <div class="mobile-hero-bg" aria-hidden="true">
+      <img class="mobile-hero-img" src="assets/all photos/My vid/frame_0041_4.00s.webp" alt="Alfaiz - AI Creative Director" width="1920" height="1080" loading="eager" fetchpriority="high">
+      <div class="mobile-hero-overlay"></div>
+    </div>
+
+    <div class="hero-sticky-stage">
+
+      <!-- Left Hero Heading (Avoids subject face) -->
+      <div class="hero-left-block">
+        <div class="hero-hi-badge" role="text" aria-label="HI">
+          <svg class="hero-hi-svg" viewBox="0 0 130 90" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+            <!-- Letter H: Chunky, rounded block letter with slight tilt -->
+            <path class="hi-path hi-h" d="M 14 24 C 14 18, 23 17, 30 17 C 35 17, 38 19, 37 24 L 37 38 L 44 38 L 44 23 C 43 18, 52 16, 59 16 C 65 16, 68 18, 67 23 L 69 69 C 69 73, 61 74, 56 74 C 50 74, 47 72, 47 69 L 46 53 L 39 53 L 39 69 C 39 74, 32 75, 27 75 C 21 75, 17 73, 17 69 Z" fill="#ffffff"/>
+            <!-- Letter I: Chunky, rounded pill block with slight tilt and higher baseline -->
+            <path class="hi-path hi-i" d="M 77 21 C 77 16, 86 15, 91 15 C 97 15, 101 16, 100 21 L 102 67 C 102 71, 95 72, 90 72 C 84 72, 79 70, 79 67 Z" fill="#ffffff"/>
+          </svg>
+        </div>
+        <h1 class="hero-name-title">
+          <span class="hero-name-main">I'm Alfaiz</span>
+          <span class="hero-role-badge">AI Creative Director</span>
+        </h1>
+      </div>
+
+      <!-- Right Hero Tagline (Clean 2 lines, centered, matches reference) -->
+      <div class="hero-right-tagline">
+        <p class="tagline-content">
+          <span class="tagline-line1">Want more sales &amp; scroll-stopping content?</span>
+          <span class="tagline-line2">I turn your product into a cinematic AI ad.</span>
+        </p>
+      </div>
+
+      <!-- Hero Bottom Bar: Categories I've Worked In (Floating pill matching reference) -->
+      <div class="hero-bottom-bar">
+        <div class="bottom-bar-left">
+          <span class="bottom-bullet"></span>
+          <span class="bar-title">CATEGORIES I'VE WORKED IN</span>
+        </div>
+        <div class="bottom-bar-marquee">
+          <div class="category-chip">
+            <svg class="cat-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            <span class="cat-label">Food Products</span>
+          </div>
+          <div class="category-chip">
+            <svg class="cat-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+            <span class="cat-label">Fashion & Jewelry</span>
+          </div>
+          <div class="category-chip">
+            <svg class="cat-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+            <span class="cat-label">Luxury Items</span>
+          </div>
+          <div class="category-chip">
+            <svg class="cat-svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+            <span class="cat-label">Beauty & Makeup</span>
+          </div>
+          <div class="category-chip">
+            <svg class="cat-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
+            <span class="cat-label">Architecture & Real Estate</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BELOW-HERO CONTENT WRAPPER (Applies light blur over persistent static last frame) -->
+  <div class="below-hero-container">
+
+    <!-- 1. SHOWREEL (Bento Grid: 1 Large + 7 Smaller Video Tiles) -->
+    <section class="section-block" id="work">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">PORTFOLIO</span>
+          <h2 class="section-title">Commercial Showreel</h2>
+          <p class="section-subtitle">AI-directed commercials with cinematic pacing and photorealistic motion.</p>
+        </div>
+
+        <!-- Showreel Masonry Grid (8 Mixed & Interspersed Video Tiles) -->
+        <div class="showreel-bento-grid showreel-masonry-grid reveal-item">
+          
+          <!-- Tile 1: 1 Large HERO Tile (Horizontal, Chocolate Protein Shake) -->
+          <div class="bento-slot tile-hero" data-slot="1">
+            <img class="card-thumb-poster" src="assets/all photos/chocolate_shake.webp" alt="Chocolate Protein Shake" width="1600" height="892" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Chocolate protien shake.mp4" poster="assets/all photos/chocolate_shake.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                  <span class="cat-label">Food</span>
+                </div>
+                <span class="bento-featured-badge mono">FEATURED</span>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title bento-hero-title">Chocolate Protein Shake</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 2: Vertical Tile (Portrait, Lip Balm) -->
+          <div class="bento-slot tile-vertical" data-slot="2">
+            <img class="card-thumb-poster" src="assets/all photos/lip_balm.webp" alt="Lip Balm" width="893" height="1600" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Lip balm.mp4" poster="assets/all photos/lip_balm.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+                  <span class="cat-label">Beauty</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">Lip Balm</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 3: Vertical Tile (Portrait, Luxury Perfume) -->
+          <div class="bento-slot tile-vertical" data-slot="3">
+            <img class="card-thumb-poster" src="assets/all photos/luxury_perfume.webp" alt="Luxury Perfume" width="720" height="1280" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Luxury perfume.mp4" poster="assets/all photos/luxury_perfume.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Luxury</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">Luxury Perfume</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 4: Medium-Featured Horizontal Tile (Lemon Juice) -->
+          <div class="bento-slot tile-horizontal tile-lemon-featured" data-slot="4">
+            <img class="card-thumb-poster" src="assets/all photos/lemon_juice.webp" alt="Lemon Juice" width="1600" height="893" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Lemon juise.mp4" poster="assets/all photos/lemon_juice.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                  <span class="cat-label">Food</span>
+                </div>
+                <span class="bento-featured-badge mono badge-lemon">FEATURED</span>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title bento-lemon-title">Lemon Juice</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 5: Vertical Tile (Portrait, Jewellery Commercial) -->
+          <div class="bento-slot tile-vertical" data-slot="5">
+            <img class="card-thumb-poster" src="assets/all photos/jewelry.webp" alt="Jewellery Commercial" width="893" height="1600" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Jwellery commercial.mp4" poster="assets/all photos/jewelry.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion & Jewelry</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">Jewellery Commercial</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 6: Vertical Tile (Portrait, Perfume) -->
+          <div class="bento-slot tile-vertical" data-slot="6">
+            <img class="card-thumb-poster" src="assets/all photos/perfume_alt.webp" alt="Perfume" width="893" height="1600" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/Perfume .mp4" poster="assets/all photos/perfume_alt.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Perfume</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">Perfume</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 7: Normal Horizontal Tile (Landscape, UGC) -->
+          <div class="bento-slot tile-horizontal" data-slot="7">
+            <img class="card-thumb-poster" src="assets/all photos/ugc_video.webp" alt="UGC" width="1280" height="720" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/UGC video.mp4" poster="assets/all photos/ugc_video.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                  <span class="cat-label">Food</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">UGC</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tile 8: Normal Horizontal Tile (Landscape, Architect AI Villa) -->
+          <div class="bento-slot tile-horizontal" data-slot="8">
+            <img class="card-thumb-poster" src="assets/all photos/ai_villa.webp" alt="Architect AI Villa" width="1600" height="1194" loading="lazy" decoding="async">
+            <video class="card-video-bg" src="assets/all vid/AI villa edit.mp4" poster="assets/all photos/ai_villa.webp" muted loop playsinline preload="none"></video>
+            <div class="bento-slot-content">
+              <div class="bento-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/></svg>
+                  <span class="cat-label">Architecture</span>
+                </div>
+              </div>
+              <div class="bento-slot-bottom">
+                <h3 class="bento-title">Architect AI Villa</h3>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="center-btn-wrap reveal-item">
+          <button class="pill-btn btn-secondary-glow" id="btn-see-more-videos">
+            <span>See More Commercials</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. COMPARISON (Side-by-Side: Traditional Production vs FramingX AI) -->
+    <section class="section-block" id="comparison">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">THE SHIFT</span>
+          <h2 class="section-title">Why AI Videos Beat Traditional Production</h2>
+        </div>
+
+        <!-- Clean Boxed Comparison (2 Columns Side by Side) -->
+        <div class="comp-clean-grid reveal-item">
+          
+          <!-- Left Box: Traditional Production -->
+          <div class="comp-clean-box box-traditional">
+            <h3 class="comp-box-title">Traditional Production</h3>
+            <div class="comp-rows-list">
+              <div class="comp-text-row">
+                <span class="comp-row-label">Delivery Time:</span>
+                <span class="comp-row-val">14-28 days</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Cost:</span>
+                <span class="comp-row-val">Expensive</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Variants:</span>
+                <span class="comp-row-val">Limited</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Crew:</span>
+                <span class="comp-row-val">Full crew needed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Box: FramingX AI -->
+          <div class="comp-clean-box box-framingx">
+            <h3 class="comp-box-title title-framingx">FramingX AI</h3>
+            <div class="comp-rows-list">
+              <div class="comp-text-row">
+                <span class="comp-row-label">Delivery Time:</span>
+                <span class="comp-row-val val-framingx">2-5 days</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Cost:</span>
+                <span class="comp-row-val val-framingx">Low-budget, premium quality</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Variants:</span>
+                <span class="comp-row-val val-framingx">Multiple flexible variants</span>
+              </div>
+              <div class="comp-text-row">
+                <span class="comp-row-label">Crew:</span>
+                <span class="comp-row-val val-framingx">No crew required</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. IMAGE SHOWREEL (Compact Unified Grid + See More) -->
+    <section class="section-block" id="photography">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">STUDIO PHOTOGRAPHY</span>
+          <h2 class="section-title">Beyond Video — Our Photography Work</h2>
+          <p class="section-subtitle">AI-crafted product and lifestyle imagery across every category.</p>
+        </div>
+
+        <!-- Pinterest-Style Masonry Photo Grid (Explicit Medium Sizing: 4 Columns Desktop, 280-310px max-width) -->
+        <div class="photo-masonry-grid reveal-item" id="photo-masonry-grid">
+          
+          <!-- Photo 1: Tall (Fashion, Footwear Design) -->
+          <div class="photo-slot photo-tile-tall" data-photo-src="assets/all photos/shoes.webp" data-title="Footwear Design" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/shoes.webp" alt="Footwear Design" width="893" height="1600" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Footwear Design</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 2: Medium (Fashion, Editorial Model) -->
+          <div class="photo-slot photo-tile-medium" data-photo-src="assets/all photos/Hyper realistic 3.webp" data-title="Editorial Model" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/Hyper realistic 3.webp" alt="Editorial Model" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Editorial Model</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 3: Medium (Luxury, Diamond Solitaire) -->
+          <div class="photo-slot photo-tile-medium" data-photo-src="assets/all photos/Ring.webp" data-title="Diamond Solitaire" data-cat="Luxury">
+            <img class="photo-img" src="assets/all photos/Ring.webp" alt="Diamond Solitaire" width="893" height="1600" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Luxury</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Diamond Solitaire</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 4: Medium (Fashion, Studio Portrait) -->
+          <div class="photo-slot photo-tile-medium" data-photo-src="assets/all photos/Hyper realistic.webp" data-title="Studio Portrait" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/Hyper realistic.webp" alt="Studio Portrait" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Studio Portrait</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 5: Compact (Fashion, Street Candid) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/fashion candit.webp" data-title="Street Candid" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/fashion candit.webp" alt="Street Candid" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Street Candid</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 6: Tall (Luxury, Oud Ameer Perfume) -->
+          <div class="photo-slot photo-tile-tall" data-photo-src="assets/all photos/oud ameer.webp" data-title="Oud Ameer Perfume" data-cat="Luxury">
+            <img class="photo-img" src="assets/all photos/oud ameer.webp" alt="Oud Ameer Perfume" width="893" height="1600" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Luxury</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Oud Ameer Perfume</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 7: Compact (Food, Dark Fantasy) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/Dark fantasy.webp" data-title="Dark Fantasy" data-cat="Food">
+            <img class="photo-img" src="assets/all photos/Dark fantasy.webp" alt="Dark Fantasy" width="1600" height="893" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                  <span class="cat-label">Food</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Dark Fantasy</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 8: Medium (Beauty, Beauty Portrait) -->
+          <div class="photo-slot photo-tile-medium" data-photo-src="assets/all photos/Hyper realistic 2.webp" data-title="Beauty Portrait" data-cat="Beauty">
+            <img class="photo-img" src="assets/all photos/Hyper realistic 2.webp" alt="Beauty Portrait" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+                  <span class="cat-label">Beauty</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Beauty Portrait</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 9: Compact (Luxury, Royal Jewellery) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/Jwellery 2.webp" data-title="Royal Jewellery" data-cat="Luxury">
+            <img class="photo-img" src="assets/all photos/Jwellery 2.webp" alt="Royal Jewellery" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Luxury</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Royal Jewellery</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 10: Compact (Beauty, Chemist at Play) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/Camist&play.webp" data-title="Chemist at Play" data-cat="Beauty">
+            <img class="photo-img" src="assets/all photos/Camist&play.webp" alt="Chemist at Play" width="1600" height="893" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+                  <span class="cat-label">Beauty</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Chemist at Play</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 11: Tall (Fashion, Contemporary Apparel) -->
+          <div class="photo-slot photo-tile-tall" data-photo-src="assets/all photos/clothing 1.webp" data-title="Contemporary Apparel" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/clothing 1.webp" alt="Contemporary Apparel" width="893" height="1600" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Contemporary Apparel</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 12: Tall (Fashion, Urban Silhouette) -->
+          <div class="photo-slot photo-tile-tall" data-photo-src="assets/all photos/clothing 2.webp" data-title="Urban Silhouette" data-cat="Fashion">
+            <img class="photo-img" src="assets/all photos/clothing 2.webp" alt="Urban Silhouette" width="893" height="1600" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <span class="cat-label">Fashion</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Urban Silhouette</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 13: Compact (Luxury, Diamond Necklace) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/Jwellery 1.webp" data-title="Diamond Necklace" data-cat="Luxury">
+            <img class="photo-img" src="assets/all photos/Jwellery 1.webp" alt="Diamond Necklace" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M11 3L8 9l4 12 4-12-3-6"/><path d="M2 9h20"/></svg>
+                  <span class="cat-label">Luxury</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Diamond Necklace</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo 14: Compact (Food, Citrus Splash) -->
+          <div class="photo-slot photo-tile-compact" data-photo-src="assets/all photos/soft drink.webp" data-title="Citrus Splash" data-cat="Food">
+            <img class="photo-img" src="assets/all photos/soft drink.webp" alt="Citrus Splash" width="1122" height="1402" loading="lazy" decoding="async">
+            <div class="photo-slot-content">
+              <div class="photo-slot-top">
+                <div class="category-chip tile-chip">
+                  <svg class="cat-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                  <span class="cat-label">Food</span>
+                </div>
+              </div>
+              <div class="photo-slot-bottom">
+                <h3 class="photo-title">Citrus Splash</h3>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="center-btn-wrap reveal-item">
+          <button class="pill-btn btn-secondary-glow" id="btn-see-more-photos">
+            <span>See Category Gallery</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. WHAT WE CREATE (4 Offering Cards) -->
+    <section class="section-block" id="services">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">CAPABILITIES</span>
+          <h2 class="section-title">What We Create</h2>
+          <p class="section-subtitle">From scroll-stopping ads to full campaigns.</p>
+        </div>
+
+        <div class="services-2x2-grid reveal-item">
+          
+          <!-- Card 1: UGC Video -->
+          <div class="service-clean-card">
+            <div class="service-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <h3 class="service-card-title">UGC Video</h3>
+            <p class="service-card-desc">Authentic creator-style videos engineered to drive conversions and trust.</p>
+          </div>
+
+          <!-- Card 2: Hypermotion Video -->
+          <div class="service-clean-card">
+            <div class="service-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 class="service-card-title">Hypermotion Video</h3>
+            <p class="service-card-desc">High-energy, dynamic camera flow tailored for scroll-stopping commercial impact.</p>
+          </div>
+
+          <!-- Card 3: Product Campaigns -->
+          <div class="service-clean-card">
+            <div class="service-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <h3 class="service-card-title">Product Campaigns</h3>
+            <p class="service-card-desc">Full commercial suites for brand launches built entirely with generative visual AI.</p>
+          </div>
+
+          <!-- Card 4: Visual Fashion Images -->
+          <div class="service-clean-card">
+            <div class="service-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+            </div>
+            <h3 class="service-card-title">Visual Fashion Images</h3>
+            <p class="service-card-desc">Editorial-quality lifestyle and lookbook imagery styled and rendered in high definition.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PROCESS/ROADMAP (3-Step Roadmap) -->
+    <section class="section-block" id="process">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">ROADMAP</span>
+          <h2 class="section-title">Faster Way to Create Your Campaign and Get More Sales</h2>
+          <p class="section-subtitle">A seamless 3-step turnaround from concept to high-converting ad.</p>
+        </div>
+
+        <div class="roadmap-track reveal-item">
+          
+          <!-- Step 1 -->
+          <div class="roadmap-step-card">
+            <div class="step-num mono">01</div>
+            <h3 class="step-title">Understand Your Product</h3>
+            <p class="step-desc">We study your brand, product identity, and audience to construct the optimal creative angle.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="roadmap-step-card">
+            <div class="step-num mono">02</div>
+            <h3 class="step-title">Create a Cinematic Premium Ad</h3>
+            <p class="step-desc">Using AI-driven production, we craft a cinematic commercial with bespoke lighting and motion.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="roadmap-step-card">
+            <div class="step-num mono">03</div>
+            <h3 class="step-title">Deliver in Days</h3>
+            <p class="step-desc">Your campaign-ready, high-converting commercial is finalized and delivered in days, not weeks.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FAQ (Accordion Style - 6 Questions) -->
+    <section class="section-block" id="faq">
+      <div class="container">
+        <div class="section-header reveal-item">
+          <span class="section-tag mono">CLARITY</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">Everything you need to know before we start.</p>
+        </div>
+
+        <div class="faq-accordion-list reveal-item">
+          
+          <!-- Item 1 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">How is this different from a traditional video shoot?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                No crew, no studio rentals, and no weeks of waiting. Everything is directed and rendered with advanced AI, delivering studio-grade commercials in days at a fraction of the cost.
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">How long does it take to get my video?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                Most projects are delivered within 2-5 days, depending on project complexity and deliverable count.
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">What is your revisions policy?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                Every video includes 2 free rounds of revisions. Further revisions are billed at a flat fee per revision. For images, we provide multiple creative variants upfront so you can select the winning direction.
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">What product categories do you work with?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                We work with food & beverage, fashion & jewelry, beauty & skincare, luxury accessories, electronics, and architecture/real estate brands.
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 5 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">How does pricing work?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                Pricing is scoped based on your specific deliverables and volume. Reach out via WhatsApp for a quick, transparent quote.
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 6 -->
+          <div class="faq-accordion-item">
+            <button class="faq-trigger" aria-expanded="false">
+              <span class="faq-question">Do I need to send a physical product sample?</span>
+              <span class="faq-icon-chevron">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </button>
+            <div class="faq-content">
+              <div class="faq-answer-inner">
+                No — you don't need to ship anything. We only require clean reference photos and your brand guidelines. Everything else is digitally lit and rendered with AI.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. BOOK A CALL (WhatsApp + Calendly Button) -->
+    <section class="section-block" id="contact">
+      <div class="container">
+        <div class="book-call-card reveal-item">
+          <span class="section-tag mono">SCHEDULE</span>
+          <h2 class="book-call-title">Book Your Call with FramingX AI</h2>
+          <p class="book-call-subtext">
+            Let's talk about your product and how we can turn it into high-converting visual content.
+          </p>
+          <div class="book-call-btns">
+            <!-- Calendly Official Embed Widget Assets -->
+            <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+            <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+            <a href="https://calendly.com/alfaizhusain28/30min" class="btn-book-call" id="btn-open-calendly" onclick="if(window.Calendly){Calendly.initPopupWidget({url: 'https://calendly.com/alfaizhusain28/30min'});return false;}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Book a Call</span>
+            </a>
+            <a href="https://wa.me/918209856985" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-secondary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.276-.1-.476-.15-.676.15-.2.3-.776.979-.951 1.18-.175.2-.351.225-.651.075-.3-.15-1.267-.467-2.414-1.49-1.127-1.004-1.888-2.245-2.113-2.629-.225-.385-.024-.593.126-.742.136-.135.3-.35.45-.526.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.526-.075-.15-.676-1.632-.926-2.234-.244-.588-.492-.508-.676-.518-.175-.008-.376-.01-.576-.01-.2 0-.526.075-.802.375-.276.3-1.052 1.029-1.052 2.509 0 1.48 1.077 2.91 1.228 3.11.15.2 2.12 3.238 5.137 4.542.718.311 1.279.496 1.716.635.722.23 1.378.198 1.9.12.58-.088 1.78-.728 2.03-1.431.25-.703.25-1.306.175-1.431-.075-.125-.275-.2-.576-.35z"/>
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.892.528 3.66 1.442 5.174L2 22l4.982-1.416A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2a8.16 8.16 0 0 1-4.228-1.176l-.303-.18-2.955.84.856-2.884-.197-.315A8.16 8.16 0 1 1 12 20.2z"/>
+              </svg>
+              <span>Chat on WhatsApp</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. FOOTER -->
+    <footer class="site-footer">
+      <div class="container footer-layout">
+        
+        <!-- Left Brand & Copyright -->
+        <div class="footer-brand-col">
+          <div class="footer-logo">
+            <span class="logo-bullet"></span>
+            <span class="logo-name">FramingX <span class="accent-text">AI</span></span>
+          </div>
+          <p class="footer-desc">AI-powered commercial production studio for bold brands.</p>
+          <p class="footer-copyright mono">© 2026 FramingX AI. All rights reserved.</p>
+        </div>
+
+        <!-- Right 2-Column Contact Info -->
+        <div class="footer-contact-grid">
+          
+          <!-- Column 1: Business -->
+          <div class="contact-col">
+            <span class="contact-col-heading mono">BUSINESS</span>
+            <div class="contact-links-list">
+              <a href="https://www.linkedin.com/in/alfez-hussain-38b9b1280" target="_blank" rel="noopener noreferrer" class="contact-btn-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c.99 0 1.8-.81 1.8-1.8 0-.99-.81-1.8-1.8-1.8-.99 0-1.8.81-1.8 1.8 0 .99.81 1.8 1.8 1.8m1.39 9.74v-8.37H5.07v8.37h2.78z"/></svg>
+                <span>LinkedIn</span>
+              </a>
+              <a href="https://instagram.com/framingx.ai" target="_blank" rel="noopener noreferrer" class="contact-btn-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <span>Instagram</span>
+              </a>
+              <a href="mailto:framingx0@gmail.com" class="contact-btn-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>framingx0@gmail.com</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Column 2: Contact -->
+          <div class="contact-col">
+            <span class="contact-col-heading mono">CONTACT</span>
+            <div class="contact-links-list">
+              <div class="contact-text-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Kota, Rajasthan, India</span>
+              </div>
+              <a href="https://wa.me/918209856985" target="_blank" rel="noopener noreferrer" class="contact-btn-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.276-.1-.476-.15-.676.15-.2.3-.776.979-.951 1.18-.175.2-.351.225-.651.075-.3-.15-1.267-.467-2.414-1.49-1.127-1.004-1.888-2.245-2.113-2.629-.225-.385-.024-.593.126-.742.136-.135.3-.35.45-.526.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.526-.075-.15-.676-1.632-.926-2.234-.244-.588-.492-.508-.676-.518-.175-.008-.376-.01-.576-.01-.2 0-.526.075-.802.375-.276.3-1.052 1.029-1.052 2.509 0 1.48 1.077 2.91 1.228 3.11.15.2 2.12 3.238 5.137 4.542.718.311 1.279.496 1.716.635.722.23 1.378.198 1.9.12.58-.088 1.78-.728 2.03-1.431.25-.703.25-1.306.175-1.431-.075-.125-.275-.2-.576-.35z"/>
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 1.892.528 3.66 1.442 5.174L2 22l4.982-1.416A9.96 9.96 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.2a8.16 8.16 0 0 1-4.228-1.176l-.303-.18-2.955.84.856-2.884-.197-.315A8.16 8.16 0 1 1 12 20.2z"/>
+                </svg>
+                <span>WhatsApp +91 8209856985</span>
+              </a>
+              <a href="mailto:alfaizhusain28@gmail.com" class="contact-btn-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>alfaizhusain28@gmail.com</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </footer>
+
+  </div><!-- /below-hero-container -->
+
+  <!-- MODAL: VIDEO SHOWREEL LIGHTBOX VIEWER -->
+  <div class="modal-backdrop" id="video-modal">
+    <div class="modal-dialog modal-video-dialog">
+      <button class="modal-close-btn" id="btn-close-video-modal" aria-label="Close Video Viewer">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-player-container">
+        <video id="modal-active-video" controls playsinline></video>
+      </div>
+      <div class="modal-video-details">
+        <span class="video-modal-cat mono" id="modal-video-cat">Commercial Reel</span>
+        <h3 class="video-modal-title" id="modal-video-title">Project Title</h3>
+      </div>
+      <div class="modal-video-shelf">
+        <span class="shelf-title mono">ALL COMMERCIALS</span>
+        <div class="shelf-thumbnails-grid" id="modal-shelf-items"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CATEGORIZED COMMERCIALS GALLERY VIEWER (Expanded View for "See More Commercials") -->
+  <div class="modal-backdrop" id="commercials-gallery-modal">
+    <div class="modal-dialog modal-gallery-dialog">
+      <div class="gallery-modal-header">
+        <div>
+          <span class="section-tag mono">COMMERCIAL ARCHIVES</span>
+          <h2 class="gallery-modal-headline">Commercial Showcase</h2>
+        </div>
+        <button class="modal-close-btn" id="btn-close-commercials-modal" aria-label="Close Commercials Gallery">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="gallery-tabs" id="commercials-gallery-tabs">
+        <button class="tab-btn active" data-filter="all">All Categories</button>
+        <button class="tab-btn" data-filter="food">Food & Beverage</button>
+        <button class="tab-btn" data-filter="ugc">UGC & Unboxing</button>
+        <button class="tab-btn" data-filter="fashion">Fashion & Apparel</button>
+        <button class="tab-btn" data-filter="tech">Tech & Electronics</button>
+        <button class="tab-btn" data-filter="luxury">Luxury Items</button>
+      </div>
+
+      <!-- Modal Masonry Grid -->
+      <div class="modal-masonry-grid" id="modal-commercials-grid">
+        <!-- Dynamically populated with new/unused commercial video cards -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CATEGORIZED PHOTOGRAPHY GALLERY VIEWER -->
+  <div class="modal-backdrop" id="gallery-modal">
+    <div class="modal-dialog modal-gallery-dialog">
+      <div class="gallery-modal-header">
+        <div>
+          <span class="section-tag mono">STUDIO ARCHIVES</span>
+          <h2 class="gallery-modal-headline">Categorized Photography</h2>
+        </div>
+        <button class="modal-close-btn" id="btn-close-gallery-modal" aria-label="Close Gallery">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="gallery-tabs">
+        <button class="tab-btn active" data-filter="all">All Categories</button>
+        <button class="tab-btn" data-filter="food">Food & Beverage</button>
+        <button class="tab-btn" data-filter="fashion">Fashion & Jewelry</button>
+        <button class="tab-btn" data-filter="beauty">Beauty & Makeup</button>
+        <button class="tab-btn" data-filter="luxury">Luxury Items</button>
+      </div>
+
+      <!-- Modal Masonry Grid -->
+      <div class="modal-masonry-grid" id="modal-gallery-grid">
+        <!-- Dynamically populated / categorized items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PHOTO LIGHTBOX VIEWER (Expand-on-Click Clean Modal View) -->
+  <div class="modal-backdrop" id="photo-lightbox-modal" role="dialog" aria-modal="true" aria-label="Photo Lightbox">
+    <div class="modal-dialog modal-photo-dialog">
+      <button class="modal-close-btn" id="btn-close-photo-modal" aria-label="Close Lightbox">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="photo-lightbox-media">
+        <img id="lightbox-img" src="" alt="Expanded photo preview">
+      </div>
+      <div class="photo-lightbox-footer">
+        <div class="category-chip tile-chip" id="lightbox-chip">
+          <span id="lightbox-chip-icon"></span>
+          <span id="lightbox-chip-label">Fashion</span>
+        </div>
+        <h3 class="photo-lightbox-title" id="lightbox-title">Photo Title</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- GSAP & ScrollTrigger with fallback -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="script.js"></script>
+</body>
+</html>
