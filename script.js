@@ -746,6 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!hasSrc) return;
 
       video.muted = true;
+      video.load();
       card.classList.add('is-playing');
       playPromise = video.play();
       if (playPromise !== undefined) {
