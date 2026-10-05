@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'v5',
       title: 'Jewellery Commercial',
       category: 'Fashion & Jewelry',
-      videoSrc: 'assets/all vid/Jwellery commercial.mp4',
+      videoSrc: 'assets/all vid/jwellery ad.mp4',
       poster: 'assets/all photos/jewelry.webp',
       desc: 'Exquisite cinematic commercial showcasing fine jewelry craftsmanship, brilliant light refractions, and precious stones.'
     },
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'UGC Video',
       title: 'Unboxing UGC2',
       videoSrc: 'assets/all vid/Unboxing UGC 2.mp4',
-      poster: '',
+      poster: 'assets/all photos/ugc_video.webp',
       desc: 'Authentic creator-style unboxing video highlighting product reveal, tactile details, and modern social format.'
     },
     {
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'Product Campaign',
       title: 'Product Unboxing',
       videoSrc: 'assets/all vid/product unboxing.mp4',
-      poster: '',
+      poster: 'assets/all photos/Camist&play.webp',
       desc: 'Cinematic product unboxing showcase capturing packaging reveal, tactile textures, and sleek presentation.'
     },
     {
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'Tech & Electronics',
       title: 'Keyboard',
       videoSrc: 'assets/all vid/Keyboard.mp4',
-      poster: '',
+      poster: 'assets/all photos/magnific_video-upscale_hEXGolTvqL.jpg',
       desc: 'High-performance mechanical keyboard advertisement showcasing tactile key switches, anodized chassis, and lighting.'
     },
     {
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'Food & Beverage',
       title: 'Drink Hypermotion',
       videoSrc: 'assets/all vid/Drink Hypermotion.mp4',
-      poster: '',
+      poster: 'assets/all photos/soft drink.webp',
       desc: 'Dynamic hypermotion beverage commercial with fluid splash physics, macro ice dynamics, and cinematic lighting.'
     },
     {
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'UGC Video',
       title: 'UGC Unboxing',
       videoSrc: 'assets/all vid/Unboxing UGC.mp4',
-      poster: '',
+      poster: 'assets/all photos/ugc_video.webp',
       desc: 'High-converting social UGC unboxing review highlighting unboxing experience, texture, and product hook.'
     },
     {
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'Fashion & Apparel',
       title: 'Fashion Clothing',
       videoSrc: 'assets/all vid/Fashion clothing.mp4',
-      poster: '',
+      poster: 'assets/all photos/clothing 1.webp',
       desc: 'High-fashion apparel commercial with editorial styling, fluid fabric motion, and contemporary aesthetic.'
     },
     {
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tag: 'Food & Beverage',
       title: 'Yoga Bar',
       videoSrc: 'assets/all vid/Yoga bar.mp4',
-      poster: '',
+      poster: 'assets/all photos/chocolate_shake.webp',
       desc: 'Healthy energy bar commercial capturing natural whole grains, honey drizzle, and wholesome outdoor vitality.'
     }
   ];
@@ -211,12 +211,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // State
   const images = new Array(FRAME_COUNT + 1);
   let loadedCount = 0;
+  const INITIAL_BATCH_COUNT = 18; // Preload enough frames for instant start & hero scrub
   let targetFrame = 1;
   let currentRenderedFrame = 1;
   let isLoaderDismissed = false;
+  let isProgressiveLoadingStarted = false;
   let heroScrollTrigger = null;
   let heroPinTrigger = null;
   let heroScrubTrigger = null;
+  let isRafRunning = false;
+  let isHeroVisible = true;
+  let layoutShowreelMasonry = null;
+  let layoutPhotoMasonry = null;
 
   const MOBILE_BREAKPOINT = 768;
   const isMobileLayout = () => window.innerWidth <= MOBILE_BREAKPOINT;
@@ -243,7 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLoader();
         resizeCanvas();
         renderFrame(1);
-        loadRemainingFrames();
+        startAnimationLoopIfNeeded();
+        loadInitialBatch();
       };
       if (firstImg.decode) {
         firstImg.decode().then(onDone).catch(onDone);
@@ -253,12 +260,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     firstImg.onerror = () => {
       console.warn('Failed to load initial frame:', firstImg.src);
-      loadRemainingFrames();
+      loadInitialBatch();
     };
   }
 
-  function loadRemainingFrames() {
-    for (let i = 2; i <= FRAME_COUNT; i++) {
+  // Load the initial interactive batch (frames 2 to 18)
+  function loadInitialBatch() {
+    let batchLoaded = 0;
+    const batchTotal = INITIAL_BATCH_COUNT - 1;
+
+    for (let i = 2; i <= INITIAL_BATCH_COUNT; i++) {
       const img = new Image();
       img.src = getFramePath(i);
       images[i] = img;
@@ -266,6 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const onDone = () => {
         loadedCount++;
         updateLoader();
+        batchLoaded++;
+        if (batchLoaded >= batchTotal) {
+          startProgressiveFrameLoading(INITIAL_BATCH_COUNT + 1);
+        }
       };
 
       img.onload = () => {
@@ -276,9 +291,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
       img.onerror = () => {
-        loadedCount++;
-        updateLoader();
+        onDone();
       };
+    }
+  }
+
+  // Progressively stream remaining frames (19 to 81) in small chunks via requestIdleCallback
+  function startProgressiveFrameLoading(startIdx) {
+    if (isProgressiveLoadingStarted) return;
+    isProgressiveLoadingStarted = true;
+
+    let nextIdx = startIdx;
+    const CHUNK_SIZE = 6;
+
+    function loadNextChunk() {
+      if (nextIdx > FRAME_COUNT) return;
+
+      const endIdx = Math.min(FRAME_COUNT, nextIdx + CHUNK_SIZE - 1);
+      let chunkRemaining = endIdx - nextIdx + 1;
+
+      for (let i = nextIdx; i <= endIdx; i++) {
+        const img = new Image();
+        img.src = getFramePath(i);
+        images[i] = img;
+
+        const onFrameDone = () => {
+          chunkRemaining--;
+          if (chunkRemaining <= 0) {
+            nextIdx = endIdx + 1;
+            if ('requestIdleCallback' in window) {
+              requestIdleCallback(loadNextChunk, { timeout: 120 });
+            } else {
+              setTimeout(loadNextChunk, 25);
+            }
+          }
+        };
+
+        img.onload = () => {
+          if (img.decode) {
+            img.decode().then(onFrameDone).catch(onFrameDone);
+          } else {
+            onFrameDone();
+          }
+        };
+        img.onerror = () => {
+          onFrameDone();
+        };
+      }
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadNextChunk, { timeout: 120 });
+    } else {
+      setTimeout(loadNextChunk, 30);
     }
   }
 
@@ -291,11 +356,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof ScrollTrigger !== 'undefined') {
       ScrollTrigger.refresh();
     }
-    updateActiveNav();
+    initNavObserver();
+    initHeroCanvasObserver();
+    if (!isProgressiveLoadingStarted) {
+      startProgressiveFrameLoading(Math.max(2, loadedCount + 1));
+    }
   }
 
   function updateLoader() {
-    const pct = Math.min(100, Math.round((loadedCount / FRAME_COUNT) * 100));
+    const pct = Math.min(100, Math.round((loadedCount / INITIAL_BATCH_COUNT) * 100));
     loaderPercent.textContent = `${pct}%`;
     loaderBar.style.width = `${pct}%`;
     if (loaderStatus) {
@@ -304,8 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else loaderStatus.textContent = 'Ready';
     }
 
-    if (loadedCount >= FRAME_COUNT) {
-      setTimeout(dismissLoader, 350);
+    if (loadedCount >= INITIAL_BATCH_COUNT && !isLoaderDismissed) {
+      setTimeout(dismissLoader, 200);
     }
   }
 
@@ -434,6 +503,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const p = Math.max(0, Math.min(1, self.progress));
           const frameIndex = 1 + p * (midFrame - 1);
           targetFrame = Math.max(1, Math.min(midFrame, frameIndex));
+          const canvasWrap = document.getElementById('canvas-wrapper');
+          if (canvasWrap && canvasWrap.style.visibility === 'hidden') {
+            canvasWrap.style.visibility = 'visible';
+          }
+          startAnimationLoopIfNeeded();
         }
       });
 
@@ -452,6 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
           } else if (self.direction === -1 && self.progress <= 0) {
             targetFrame = midFrame;
           }
+          const canvasWrap = document.getElementById('canvas-wrapper');
+          if (canvasWrap && canvasWrap.style.visibility === 'hidden') {
+            canvasWrap.style.visibility = 'visible';
+          }
+          startAnimationLoopIfNeeded();
         }
       });
 
@@ -468,6 +547,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let lastDrawnFrame = -1;
 
+  function startAnimationLoopIfNeeded() {
+    if (!isRafRunning && !isMobileLayout()) {
+      isRafRunning = true;
+      requestAnimationFrame(animationLoop);
+    }
+  }
+
   // Render Loop (Desktop only) with requestAnimationFrame & butter-smooth LERP
   function animationLoop() {
     if (!isMobileLayout()) {
@@ -483,15 +569,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderFrame(frameToDraw);
         lastDrawnFrame = frameToDraw;
       }
+
+      // If hero section is offscreen and LERP has settled, stop the rAF loop to drop idle CPU/GPU usage
+      if (!isHeroVisible && Math.abs(diff) <= 0.005) {
+        isRafRunning = false;
+        const canvasWrap = document.getElementById('canvas-wrapper');
+        if (canvasWrap) canvasWrap.style.visibility = 'hidden';
+        return;
+      }
     }
-    requestAnimationFrame(animationLoop);
+
+    if (isRafRunning) {
+      requestAnimationFrame(animationLoop);
+    }
   }
 
-  // Scroll Handler (Fallback scrubbing + Throttled Active Nav Detection)
-  let isNavTicking = false;
-
+  // Scroll Handler (Fallback scrubbing when GSAP is not used - zero layout queries)
   function onScroll() {
-    // Only scrub canvas frames on desktop fallback when not using GSAP ScrollTrigger
     if (!heroScrollTrigger && !isMobileLayout()) {
       const scrollY = window.scrollY;
       const heroHeight = heroTrack ? heroTrack.offsetHeight : window.innerHeight;
@@ -501,25 +595,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (scrollY <= heroScrollDistance) {
           const progress = Math.max(0, Math.min(1, scrollY / heroScrollDistance));
           targetFrame = 1 + progress * (FRAME_COUNT - 1);
+          startAnimationLoopIfNeeded();
         } else {
           targetFrame = FRAME_COUNT;
         }
       }
     }
-
-    // Throttled with requestAnimationFrame for maximum performance
-    if (!isNavTicking) {
-      requestAnimationFrame(() => {
-        updateActiveNav();
-        isNavTicking = false;
-      });
-      isNavTicking = true;
-    }
   }
 
   // =========================================================================
-  // NAV BAR ACTIVE-LINK TRACKING (Direct Viewport Center Point Detection)
-  // Calculates vertical center point: window.innerHeight / 2 + window.scrollY
+  // NAV BAR ACTIVE-LINK TRACKING (IntersectionObserver - Zero Layout Thrashing)
   // =========================================================================
   let currentActiveNav = null;
 
@@ -537,41 +622,86 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function updateActiveNav() {
-    const scrollY = window.scrollY || window.pageYOffset || 0;
-    const windowHeight = window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
+  // Reactive section observer for buttery-smooth 60fps scrolling
+  function initNavObserver() {
+    const sectionIds = ['hero', 'work', 'faq', 'contact'];
+    const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+    if (!sections.length || !('IntersectionObserver' in window)) return;
 
-    // Vertical CENTER point of the viewport in document coordinates
-    const viewportCenter = scrollY + windowHeight / 2;
+    const visibleSections = new Map();
 
-    const workEl = document.getElementById('work');
-    const faqEl = document.getElementById('faq');
-    const contactEl = document.getElementById('contact');
+    const navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        visibleSections.set(entry.target.id, entry.isIntersecting);
+      });
 
-    if (!workEl || !faqEl || !contactEl) return;
+      // Priority in document order (bottom to top): contact > faq > work > hero
+      let activeTarget = null;
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const id = sectionIds[i];
+        if (visibleSections.get(id)) {
+          activeTarget = id;
+          break;
+        }
+      }
 
-    // Actual top positions on the page via getBoundingClientRect() + scrollY
-    const workTop = workEl.getBoundingClientRect().top + scrollY;
-    const faqTop = faqEl.getBoundingClientRect().top + scrollY;
-    const contactTop = contactEl.getBoundingClientRect().top + scrollY;
+      if (activeTarget) {
+        setActiveNavLink(activeTarget);
+      } else if (window.scrollY < 120) {
+        setActiveNavLink('hero');
+      }
+    }, {
+      rootMargin: '-20% 0px -50% 0px',
+      threshold: 0
+    });
 
-    let activeNav = 'hero';
+    sections.forEach(sec => navObserver.observe(sec));
 
-    // 1. Scrolled near/to the very bottom of the document -> Contact is active
-    if (scrollY + windowHeight >= docHeight - 40) {
-      activeNav = 'contact';
-    } else if (viewportCenter >= contactTop) {
-      activeNav = 'contact';
-    } else if (viewportCenter >= faqTop) {
-      activeNav = 'faq';
-    } else if (viewportCenter >= workTop) {
-      activeNav = 'work';
-    } else {
-      activeNav = 'hero';
+    // Also observe footer: when scrolled into footer, contact is active
+    const footer = document.querySelector('.site-footer');
+    if (footer) {
+      const footerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setActiveNavLink('contact');
+          }
+        });
+      }, { threshold: 0.1 });
+      footerObserver.observe(footer);
     }
+  }
 
-    setActiveNavLink(activeNav);
+  // Canvas visibility observer: skips 4K/2x canvas GPU compositing when scrolled away
+  function initHeroCanvasObserver() {
+    const heroEl = document.getElementById('hero');
+    const canvasWrap = document.getElementById('canvas-wrapper');
+    if (!heroEl || !canvasWrap || !('IntersectionObserver' in window)) return;
+
+    const heroObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        isHeroVisible = entry.isIntersecting;
+        if (isHeroVisible) {
+          canvasWrap.style.visibility = 'visible';
+          startAnimationLoopIfNeeded();
+        } else {
+          if (Math.abs(targetFrame - currentRenderedFrame) <= 0.01) {
+            canvasWrap.style.visibility = 'hidden';
+          }
+        }
+      });
+    }, {
+      rootMargin: '150px 0px 150px 0px',
+      threshold: 0
+    });
+
+    heroObserver.observe(heroEl);
+  }
+
+  // Manual fallback for resize/init only
+  function updateActiveNav() {
+    if (window.scrollY < 120) {
+      setActiveNavLink('hero');
+    }
   }
 
   // Smooth click handler with instant active state
@@ -640,27 +770,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Lazy-warmup videos below the fold when user scrolls near the showreel section
+  // Staggered lazy-warmup for showreel videos (100px margin + staggered queue to prevent network spikes)
   function initVideoLazyLoading() {
     const videoSlots = document.querySelectorAll('.showreel-bento-grid video');
     if (!videoSlots.length) return;
 
     if ('IntersectionObserver' in window) {
+      const warmupQueue = [];
+      let isWarmingUp = false;
+
+      function processWarmupQueue() {
+        if (!warmupQueue.length) {
+          isWarmingUp = false;
+          return;
+        }
+        isWarmingUp = true;
+        const vid = warmupQueue.shift();
+        if (vid && vid.getAttribute('preload') === 'none') {
+          vid.setAttribute('preload', 'metadata');
+        }
+        setTimeout(processWarmupQueue, 140);
+      }
+
       const videoObserver = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const vid = entry.target;
-            if (vid.getAttribute('preload') === 'none') {
-              vid.setAttribute('preload', 'metadata');
-            }
             obs.unobserve(vid);
+            if (vid.getAttribute('preload') === 'none') {
+              warmupQueue.push(vid);
+              if (!isWarmingUp) {
+                processWarmupQueue();
+              }
+            }
           }
         });
-      }, { rootMargin: '400px 0px 400px 0px' });
+      }, { rootMargin: '100px 0px 100px 0px' });
 
       videoSlots.forEach(v => videoObserver.observe(v));
-    } else {
-      videoSlots.forEach(v => v.setAttribute('preload', 'metadata'));
     }
   }
 
@@ -733,45 +880,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Hover-to-Play Video Preview for Bento Grid (Wired & Ready)
+  // Hover-to-Play Video Preview for Bento Grid (Debounced to avoid decoder thrashing on rapid cursor movements)
   const bentoSlots = document.querySelectorAll('.showreel-bento-grid .bento-slot');
   bentoSlots.forEach(card => {
     const video = card.querySelector('video');
     if (!video) return;
 
     let playPromise = null;
+    let hoverTimer = null;
 
     card.addEventListener('mouseenter', () => {
       const hasSrc = video.getAttribute('src') || video.currentSrc || video.querySelector('source[src]');
       if (!hasSrc) return;
 
-      video.muted = true;
-      card.classList.add('is-playing');
-      playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => {
+        video.muted = true;
+        // Only load if video does not yet have buffered frame data
+        if (video.readyState < 2) {
+          try { video.load(); } catch (e) {}
+        }
+        card.classList.add('is-playing');
+        playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      }, 130);
     });
 
     card.addEventListener('mouseleave', () => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        hoverTimer = null;
+      }
       card.classList.remove('is-playing');
       const hasSrc = video.getAttribute('src') || video.currentSrc || video.querySelector('source[src]');
       if (!hasSrc) return;
 
-      if (playPromise !== undefined && playPromise !== null) {
-        playPromise.then(() => {
-          video.pause();
-          video.currentTime = 0;
-          try { video.load(); } catch (e) {}
-        }).catch(() => {
-          video.pause();
-          video.currentTime = 0;
-          try { video.load(); } catch (e) {}
-        });
-      } else {
+      const stopVideo = () => {
         video.pause();
         video.currentTime = 0;
-        try { video.load(); } catch (e) {}
+      };
+
+      if (playPromise !== undefined && playPromise !== null) {
+        playPromise.then(stopVideo).catch(stopVideo);
+      } else {
+        stopVideo();
       }
     });
   });
@@ -783,7 +937,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.showreel-bento-grid .bento-slot video').forEach(v => {
         v.pause();
         v.currentTime = 0;
-        try { v.load(); } catch (e) {}
       });
       const vidElem = card.querySelector('video');
       const vidSrc = vidElem ? vidElem.getAttribute('src') : null;
@@ -916,17 +1069,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    layoutShowreelMasonry = layoutMasonry;
     layoutMasonry();
-
-    window.addEventListener('resize', () => {
-      requestAnimationFrame(layoutMasonry);
-    });
 
     window.addEventListener('load', layoutMasonry);
 
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => {
-        layoutMasonry();
+      let lastW = container.clientWidth;
+      const ro = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const newW = entry.contentRect.width;
+          if (newW > 0 && Math.abs(newW - lastW) > 4) {
+            lastW = newW;
+            layoutMasonry();
+          }
+        }
       });
       ro.observe(container);
     }
@@ -1014,17 +1171,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    layoutPhotoMasonry = layoutMasonry;
     layoutMasonry();
-
-    window.addEventListener('resize', () => {
-      requestAnimationFrame(layoutMasonry);
-    });
 
     window.addEventListener('load', layoutMasonry);
 
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => {
-        layoutMasonry();
+      let lastW = container.clientWidth;
+      const ro = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const newW = entry.contentRect.width;
+          if (newW > 0 && Math.abs(newW - lastW) > 4) {
+            lastW = newW;
+            layoutMasonry();
+          }
+        }
       });
       ro.observe(container);
     }
@@ -1248,17 +1409,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Calendly Official Popup Widget Handler
+  // Calendly Official Popup Widget Handler (On-Demand Lazy Load)
   const btnOpenCalendly = document.getElementById('btn-open-calendly');
-  if (btnOpenCalendly) {
-    btnOpenCalendly.addEventListener('click', (e) => {
-      e.preventDefault();
-      const calendlyUrl = 'https://calendly.com/alfaizhusain28/30min';
+  let isCalendlyLoading = false;
+
+  function loadAndOpenCalendly() {
+    const calendlyUrl = 'https://calendly.com/alfaizhusain28/30min';
+
+    if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+      window.Calendly.initPopupWidget({ url: calendlyUrl });
+      return;
+    }
+
+    if (isCalendlyLoading) return;
+    isCalendlyLoading = true;
+
+    // Dynamically inject Calendly stylesheet if not already added
+    if (!document.getElementById('calendly-widget-css')) {
+      const link = document.createElement('link');
+      link.id = 'calendly-widget-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://assets.calendly.com/assets/external/widget.css';
+      document.head.appendChild(link);
+    }
+
+    // Dynamically inject Calendly script
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    script.onload = () => {
+      isCalendlyLoading = false;
       if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
         window.Calendly.initPopupWidget({ url: calendlyUrl });
       } else {
         window.open(calendlyUrl, '_blank', 'noopener,noreferrer');
       }
+    };
+    script.onerror = () => {
+      isCalendlyLoading = false;
+      window.open(calendlyUrl, '_blank', 'noopener,noreferrer');
+    };
+    document.body.appendChild(script);
+  }
+
+  if (btnOpenCalendly) {
+    btnOpenCalendly.addEventListener('click', (e) => {
+      e.preventDefault();
+      loadAndOpenCalendly();
     });
   }
 
@@ -1272,18 +1469,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Event Listeners
-  window.addEventListener('resize', () => {
-    if (!isMobileLayout() && loadedCount === 0) {
-      preloadFrames();
-    }
-    resizeCanvas();
-    initHeroScrollPin();
-    if (typeof ScrollTrigger !== 'undefined') {
-      ScrollTrigger.refresh();
-    }
-    updateActiveNav();
-  });
+  // Event Listeners (Consolidated & Debounced ~150ms Resize)
+  let resizeDebounceTimer = null;
+
+  function handleWindowResize() {
+    if (resizeDebounceTimer) clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = setTimeout(() => {
+      if (!isMobileLayout() && loadedCount === 0) {
+        preloadFrames();
+      }
+      resizeCanvas();
+      initHeroScrollPin();
+      if (typeof layoutShowreelMasonry === 'function') {
+        layoutShowreelMasonry();
+      }
+      if (typeof layoutPhotoMasonry === 'function') {
+        layoutPhotoMasonry();
+      }
+      if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.refresh();
+      }
+      updateActiveNav();
+    }, 150);
+  }
+
+  window.addEventListener('resize', handleWindowResize, { passive: true });
+  window.addEventListener('orientationchange', handleWindowResize, { passive: true });
   window.addEventListener('scroll', onScroll, { passive: true });
 
   // Init Engine
@@ -1295,8 +1506,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroScrollPin();
   }
   initVideoLazyLoading();
+  initNavObserver();
+  initHeroCanvasObserver();
   updateActiveNav();
-  requestAnimationFrame(animationLoop);
+  startAnimationLoopIfNeeded();
 
   // Safety fallback: reveal page after 1.2s
   setTimeout(dismissLoader, 1200);

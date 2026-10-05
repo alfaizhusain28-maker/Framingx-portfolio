@@ -859,10 +859,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: rgba(10, 10, 14, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 10, 14, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 0.32rem 0.8rem;
   border-radius: var(--radius-full);
   font-size: 0.76rem;
