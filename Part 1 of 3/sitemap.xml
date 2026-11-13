@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://framingx.in/</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <image:image><image:loc>https://framingx.in/og-image.jpg</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/chocolate_shake.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/lip_balm.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/luxury_perfume.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/shoes.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/Ring.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/Jwellery%201.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/all%20photos/oud%20ameer.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/motion-edits/motion-edit-1.webp</image:loc></image:image>
+    <image:image><image:loc>https://framingx.in/assets/motion-edits/motion-edit-4.webp</image:loc></image:image>
+  </url>
+</urlset>
