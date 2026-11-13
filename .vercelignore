@@ -1,0 +1,17 @@
+# Not part of the website: kept out of every deployment
+My vid/
+thumbnails/
+Ai edit Motion graphics/
+.rollback/
+tests/
+.github/
+*.original.mp4
+assets/all vid/Ear buds.mp4
+assets/all vid/Headphone.mp4
+assets/all vid/Mamaearth.mp4
+assets/all vid/Peanut butter.mp4
+assets/all vid/Protein shake.mp4
+assets/Man_turning_head_*.mp4
+.DS_Store
+FramingX-upload/
+GitHub-upload/

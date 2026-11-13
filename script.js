@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'ext_v2',
       cat: ['ugc', 'tech'],
       tag: 'UGC Video',
-      title: 'Unboxing UGC2',
+      title: 'Unboxing UGC 2',
       videoSrc: 'assets/all vid/Unboxing UGC 2.mp4',
       poster: 'assets/all photos/ugc_video.webp',
       desc: 'Authentic creator-style unboxing video highlighting product reveal, tactile details, and modern social format.'
@@ -231,15 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function getFramePath(index) {
     const num = String(index).padStart(4, '0');
     const sec = ((index - 1) * 0.1).toFixed(2);
-    return `${encodeURI(FOLDER_NAME)}/frame_${num}_${sec}s.webp`;
+    const folder = isMobileLayout() ? `${FOLDER_NAME}/mobile` : FOLDER_NAME;
+    return `${encodeURI(folder)}/frame_${num}_${sec}s.webp`;
   }
 
   // Preload frames with background off-thread decoding for zero stutter during scrub
   function preloadFrames() {
-    if (isMobileLayout()) {
-      dismissLoader();
-      return;
-    }
     const firstImg = new Image();
     firstImg.src = getFramePath(1);
     images[1] = firstImg;
@@ -353,6 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
     preloader.classList.add('hidden');
     initHeroScrollPin();
     initScrollAnimations();
+    initWorkSectionAnimation();
+    initPremiumAnimations();
     if (typeof ScrollTrigger !== 'undefined') {
       ScrollTrigger.refresh();
     }
@@ -381,8 +380,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Canvas Sizing & Retina scaling
   function resizeCanvas() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const wrapEl = document.getElementById('canvas-wrapper');
+    const wrapRect = wrapEl ? wrapEl.getBoundingClientRect() : null;
+    const w = (wrapRect && wrapRect.width) || window.innerWidth;
+    const h = (wrapRect && wrapRect.height) || window.innerHeight;
 
     canvas.width = w * dpr;
     canvas.height = h * dpr;
@@ -446,28 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
    *   Animation is disabled entirely. Static hero image is displayed without pinning.
    */
   function initHeroScrollPin() {
-    if (isMobileLayout()) {
-      if (heroPinTrigger) {
-        heroPinTrigger.kill();
-        heroPinTrigger = null;
-      }
-      if (heroScrubTrigger) {
-        heroScrubTrigger.kill();
-        heroScrubTrigger = null;
-      }
-      heroScrollTrigger = null;
-      if (heroTrack) {
-        heroTrack.style.height = '';
-        heroTrack.style.position = '';
-        const stage = heroTrack.querySelector('.hero-sticky-stage');
-        if (stage) {
-          stage.style.position = '';
-          stage.style.height = '';
-        }
-      }
-      return;
-    }
-
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
 
@@ -485,6 +464,33 @@ document.addEventListener('DOMContentLoaded', () => {
       const getPinDistance = () => Math.min(1100, Math.max(600, Math.round(window.innerHeight * 0.85)));
       // Phase 2 (unpinned): ~0.95x viewport height
       const getUnpinnedDistance = () => Math.min(1200, Math.max(700, Math.round(window.innerHeight * 0.95)));
+
+      // PHONES: the whole film plays while the hero stays pinned (frames 1 -> 81),
+      // then the page continues. Same feel as the iNSITERS site.
+      if (isMobileLayout()) {
+        const getMobilePinDistance = () => Math.round(window.innerHeight * 2.4);
+        heroPinTrigger = ScrollTrigger.create({
+          trigger: '#hero',
+          start: 'top top',
+          end: () => `+=${getMobilePinDistance()}`,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          scrub: 0.05,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const p = Math.max(0, Math.min(1, self.progress));
+            targetFrame = 1 + p * (FRAME_COUNT - 1);
+            const canvasWrap = document.getElementById('canvas-wrapper');
+            if (canvasWrap && canvasWrap.style.visibility === 'hidden') {
+              canvasWrap.style.visibility = 'visible';
+            }
+            startAnimationLoopIfNeeded();
+          }
+        });
+        heroScrollTrigger = heroPinTrigger;
+        return;
+      }
 
       const midFrame = 1 + Math.round(0.5 * (FRAME_COUNT - 1)); // Frame 41
 
@@ -548,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastDrawnFrame = -1;
 
   function startAnimationLoopIfNeeded() {
-    if (!isRafRunning && !isMobileLayout()) {
+    if (!isRafRunning) {
       isRafRunning = true;
       requestAnimationFrame(animationLoop);
     }
@@ -556,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render Loop (Desktop only) with requestAnimationFrame & butter-smooth LERP
   function animationLoop() {
-    if (!isMobileLayout()) {
+    {
       const diff = targetFrame - currentRenderedFrame;
       if (Math.abs(diff) > 0.005) {
         currentRenderedFrame += diff * 0.28;
@@ -586,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Scroll Handler (Fallback scrubbing when GSAP is not used - zero layout queries)
   function onScroll() {
-    if (!heroScrollTrigger && !isMobileLayout()) {
+    if (!heroScrollTrigger) {
       const scrollY = window.scrollY;
       const heroHeight = heroTrack ? heroTrack.offsetHeight : window.innerHeight;
       const heroScrollDistance = heroHeight - window.innerHeight;
@@ -623,7 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Reactive section observer for buttery-smooth 60fps scrolling
+  let navObserverStarted = false;
   function initNavObserver() {
+    if (navObserverStarted) return; // started once (avoids duplicate observers)
+    navObserverStarted = true;
     const sectionIds = ['hero', 'work', 'faq', 'contact'];
     const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
     if (!sections.length || !('IntersectionObserver' in window)) return;
@@ -672,7 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Canvas visibility observer: skips 4K/2x canvas GPU compositing when scrolled away
+  let heroCanvasObserverStarted = false;
   function initHeroCanvasObserver() {
+    if (heroCanvasObserverStarted) return; // started once (avoids duplicate observers)
+    heroCanvasObserverStarted = true;
     const heroEl = document.getElementById('hero');
     const canvasWrap = document.getElementById('canvas-wrapper');
     if (!heroEl || !canvasWrap || !('IntersectionObserver' in window)) return;
@@ -722,6 +734,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const revealGroups = document.querySelectorAll('.section-block');
       revealGroups.forEach(section => {
+        // These sections have their own premium entrances (see initPremiumAnimations)
+        if (['work', 'motion-edits', 'photography', 'comparison', 'services', 'process', 'faq', 'contact'].includes(section.id)) return;
         const items = section.querySelectorAll('.reveal-item');
         if (!items.length) return;
 
@@ -767,6 +781,494 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       document.querySelectorAll('.reveal-item').forEach(el => observer.observe(el));
+    }
+  }
+
+  // =========================================================================
+  // WORK SECTION: cinematic entrance (iNSITERS-style, expo easing)
+  //   1. Ambient red glow blooms behind the section
+  //   2. PORTFOLIO tag tightens in, title rises word by word from a mask,
+  //      subtitle sharpens from a soft blur
+  //   3. Each tile opens like a curtain (clip-path wipe) while its image
+  //      settles from a slow zoom, a red light sweep crosses it, then the
+  //      chip + title slide up
+  //   4. Gentle scroll parallax inside every tile image afterwards
+  // =========================================================================
+  let workAnimInitialized = false;
+
+  // Splits a heading into masked words using DOM nodes (no HTML string injection)
+  function splitWords(el, text) {
+    el.textContent = '';
+    text.split(/\s+/).forEach((w, i) => {
+      if (i) el.appendChild(document.createTextNode(' '));
+      const outer = document.createElement('span');
+      outer.className = 'sr-word';
+      outer.setAttribute('aria-hidden', 'true');
+      const inner = document.createElement('span');
+      inner.className = 'sr-word-inner';
+      inner.textContent = w;
+      outer.appendChild(inner);
+      el.appendChild(outer);
+    });
+  }
+
+  function initWorkSectionAnimation() {
+    if (workAnimInitialized) return;
+    workAnimInitialized = true;
+
+    const section = document.getElementById('work');
+    if (!section) return;
+    const header = section.querySelector('.section-header');
+    const grid = section.querySelector('.showreel-masonry-grid');
+    const btnWrap = section.querySelector('.center-btn-wrap');
+    const tiles = Array.from(section.querySelectorAll('.bento-slot'));
+    const revealEls = [header, grid, btnWrap].filter(Boolean);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+      revealEls.forEach(el => el.classList.add('is-revealed'));
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Containers become visible; the children carry the animation
+    gsap.set(revealEls, { opacity: 1, y: 0 });
+    revealEls.forEach(el => el.classList.add('is-revealed', 'work-anim-ready'));
+
+    // 1. Ambient glow
+    const glow = document.createElement('div');
+    glow.className = 'work-ambient-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    section.prepend(glow);
+    gsap.fromTo(glow, { opacity: 0, scale: 0.6 }, {
+      opacity: 1, scale: 1, ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top 95%', end: 'top 20%', scrub: 0.8 }
+    });
+
+    // 2. Header: tag, masked title words, blurred subtitle
+    if (header) {
+      const tag = header.querySelector('.section-tag');
+      const title = header.querySelector('.section-title');
+      const sub = header.querySelector('.section-subtitle');
+      let words = [];
+      if (title && !title.dataset.split) {
+        title.dataset.split = '1';
+        const text = title.textContent.trim();
+        title.setAttribute('aria-label', text);
+        splitWords(title, text);
+        words = title.querySelectorAll('.sr-word-inner');
+      }
+
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: header, start: 'top 88%', once: true }
+      });
+      if (tag) {
+        tl.fromTo(tag,
+          { opacity: 0, y: 14, letterSpacing: '0.6em', scale: 0.9 },
+          { opacity: 1, y: 0, letterSpacing: '0.12em', scale: 1, duration: 1.1, ease: 'expo.out', clearProps: 'letterSpacing,transform' });
+      }
+      if (words.length) {
+        tl.fromTo(words,
+          { yPercent: 115, rotate: 6, opacity: 0 },
+          { yPercent: 0, rotate: 0, opacity: 1, duration: 1.2, stagger: 0.09, ease: 'expo.out', clearProps: 'transform' },
+          '-=0.85');
+      }
+      if (sub) {
+        tl.fromTo(sub,
+          { opacity: 0, y: 18, filter: 'blur(10px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'expo.out', clearProps: 'filter,transform' },
+          '-=0.9');
+      }
+    }
+
+    // 3. Tiles: curtain wipe + image settle + light sweep + content rise
+    const media = (tile) => tile.querySelectorAll('.card-thumb-poster, .card-video-bg');
+    tiles.forEach(tile => {
+      const sheen = document.createElement('span');
+      sheen.className = 'tile-reveal-sheen';
+      sheen.setAttribute('aria-hidden', 'true');
+      tile.appendChild(sheen);
+      gsap.set(tile, { clipPath: 'inset(100% 0% 0% 0% round 14px)', y: 70 });
+      gsap.set(media(tile), { scale: 1.35 });
+      gsap.set(tile.querySelectorAll('.bento-slot-top, .bento-slot-bottom'), { opacity: 0, y: 22 });
+    });
+
+    const revealTiles = (batch) => {
+      // reading order: top to bottom, then left to right
+      batch.sort((a, b) => (a.offsetTop - b.offsetTop) || (a.offsetLeft - b.offsetLeft));
+      batch.forEach((tile, i) => {
+        const delay = i * 0.11;
+        const tl = gsap.timeline({ delay, onComplete: () => tile.classList.remove('anim-lock') });
+        tile.classList.add('anim-lock');
+        tl.to(tile, {
+          clipPath: 'inset(0% 0% 0% 0% round 14px)', y: 0,
+          duration: 1.35, ease: 'expo.out',
+          clearProps: 'clipPath,transform'
+        })
+        .to(media(tile), { scale: 1.12, duration: 1.8, ease: 'expo.out' }, 0)
+        .fromTo(tile.querySelector('.tile-reveal-sheen'),
+          { xPercent: -120, opacity: 1 },
+          { xPercent: 120, opacity: 1, duration: 1.1, ease: 'power2.inOut',
+            onComplete() { this.targets()[0].remove(); } }, 0.15)
+        .to(tile.querySelectorAll('.bento-slot-top, .bento-slot-bottom'),
+          { opacity: 1, y: 0, duration: 0.9, stagger: 0.08, ease: 'expo.out', clearProps: 'transform' }, 0.45);
+      });
+    };
+
+    ScrollTrigger.batch(tiles, {
+      start: 'top 92%',
+      once: true,
+      interval: 0.12,
+      batchMax: 8,
+      onEnter: revealTiles
+    });
+
+    // 4. Subtle parallax inside each tile image (tile frame stays put)
+    tiles.forEach(tile => {
+      gsap.fromTo(media(tile), { yPercent: -4 }, {
+        yPercent: 4, ease: 'none',
+        scrollTrigger: { trigger: tile, start: 'top bottom', end: 'bottom top', scrub: true }
+      });
+    });
+
+    // Button: rises with a soft glow pulse
+    if (btnWrap) {
+      const btn = btnWrap.querySelector('.pill-btn');
+      gsap.fromTo(btn || btnWrap,
+        { opacity: 0, y: 30, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 1.1, ease: 'expo.out', clearProps: 'transform',
+          scrollTrigger: { trigger: btnWrap, start: 'top 95%', once: true },
+          onComplete: () => btn && btn.classList.add('work-btn-glow') });
+    }
+  }
+
+  // =========================================================================
+  // PREMIUM ENTRANCES FOR ALL REMAINING SECTIONS (same language as Work)
+  // =========================================================================
+  let premiumAnimInitialized = false;
+
+  // Masked word-by-word title + tightening tag + blur-to-sharp subtitle
+  function animateHeading(container, opts = {}) {
+    if (!container) return null;
+    const tag = container.querySelector('.section-tag');
+    const title = container.querySelector(opts.titleSel || '.section-title');
+    const sub = container.querySelector(opts.subSel || '.section-subtitle');
+    let words = [];
+    if (title) {
+      if (!title.dataset.split) {
+        title.dataset.split = '1';
+        const text = title.textContent.trim();
+        title.setAttribute('aria-label', text);
+        splitWords(title, text);
+      }
+      words = title.querySelectorAll('.sr-word-inner');
+    }
+    const tl = gsap.timeline({
+      paused: !!opts.paused,
+      scrollTrigger: opts.paused ? undefined : { trigger: container, start: 'top 88%', once: true }
+    });
+    if (tag) {
+      tl.fromTo(tag,
+        { opacity: 0, y: 14, letterSpacing: '0.6em', scale: 0.9 },
+        { opacity: 1, y: 0, letterSpacing: '0.12em', scale: 1, duration: 1.1, ease: 'expo.out', clearProps: 'letterSpacing,transform' });
+    }
+    if (words.length) {
+      tl.fromTo(words,
+        { yPercent: 115, rotate: 6, opacity: 0 },
+        { yPercent: 0, rotate: 0, opacity: 1, duration: 1.2, stagger: words.length > 5 ? 0.05 : 0.09, ease: 'expo.out', clearProps: 'transform' },
+        tag ? '-=0.85' : 0);
+    }
+    if (sub) {
+      tl.fromTo(sub,
+        { opacity: 0, y: 18, filter: 'blur(10px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1, ease: 'expo.out', clearProps: 'filter,transform' },
+        '-=0.9');
+    }
+    return tl;
+  }
+
+  function initPremiumAnimations() {
+    if (premiumAnimInitialized) return;
+    premiumAnimInitialized = true;
+
+    const ids = ['motion-edits', 'photography', 'comparison', 'services', 'process', 'faq', 'contact'];
+    const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
+    const footer = document.querySelector('.site-footer');
+    const containers = [];
+    sections.forEach(sec => sec.querySelectorAll('.reveal-item').forEach(el => containers.push(el)));
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+      containers.forEach(el => el.classList.add('is-revealed'));
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Containers visible instantly; their children carry the motion
+    containers.forEach(el => el.classList.add('anim-lock'));
+    gsap.set(containers, { opacity: 1, y: 0 });
+
+    const lock = (els) => els.forEach(el => el.classList.add('anim-lock'));
+    const unlock = (els) => els.forEach(el => el.classList.remove('anim-lock'));
+    const readingOrder = (a, b) => {
+      const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+      return (Math.round(ra.top) - Math.round(rb.top)) || (ra.left - rb.left);
+    };
+
+    // Section headings
+    sections.forEach(sec => {
+      const header = sec.querySelector('.section-header');
+      if (header) animateHeading(header);
+    });
+
+    // ---- MOTION EDITS: cards fan out from a stacked hand, then lift into place ----
+    const meTrack = document.getElementById('motion-edits-track');
+    if (meTrack) {
+      const meCards = Array.from(meTrack.querySelectorAll('.motion-edit-card'));
+      const isRow = () => getComputedStyle(meTrack).overflowX !== 'auto' && getComputedStyle(meTrack).overflowX !== 'scroll';
+      const centerOffset = (c) => {
+        const tr = meTrack.getBoundingClientRect(), cr = c.getBoundingClientRect();
+        return (tr.left + tr.width / 2) - (cr.left + cr.width / 2);
+      };
+      gsap.set(meCards, { opacity: 0 });
+      ScrollTrigger.create({
+        trigger: meTrack, start: 'top 85%', once: true,
+        onEnter: () => {
+          lock(meCards);
+          const n = meCards.length;
+          if (isRow()) {
+            gsap.fromTo(meCards,
+              { opacity: 0, x: (i, c) => centerOffset(c), y: 140, rotate: (i) => (i - (n - 1) / 2) * 7, scale: 0.82, transformOrigin: '50% 120%' },
+              { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1, duration: 1.6, stagger: 0.07, ease: 'expo.out', clearProps: 'transform',
+                onComplete: () => unlock(meCards) });
+          } else {
+            gsap.fromTo(meCards,
+              { opacity: 0, y: 90, rotate: 4, scale: 0.9 },
+              { opacity: 1, y: 0, rotate: 0, scale: 1, duration: 1.3, stagger: 0.1, ease: 'expo.out', clearProps: 'transform',
+                onComplete: () => unlock(meCards) });
+          }
+          gsap.fromTo(meTrack.querySelectorAll('.motion-overlay, .motion-bottom'),
+            { opacity: 0 }, { opacity: 1, duration: 1, delay: 0.7, stagger: 0.07, ease: 'power2.out', clearProps: 'opacity' });
+        }
+      });
+    }
+
+    // ---- PHOTOGRAPHY: iris-open frames, image settles from a tilted zoom ----
+    const photoSection = document.getElementById('photography');
+    if (photoSection) {
+      const photos = Array.from(photoSection.querySelectorAll('.photo-slot'));
+      photos.forEach(ph => {
+        gsap.set(ph, { clipPath: 'inset(14% 14% 14% 14% round 12px)', opacity: 0, y: 50 });
+        gsap.set(ph.querySelector('.photo-img'), { scale: 1.5, rotate: -3 });
+        gsap.set(ph.querySelectorAll('.photo-slot-top, .photo-slot-bottom'), { opacity: 0, y: 14 });
+      });
+      ScrollTrigger.batch(photos, {
+        start: 'top 92%', once: true, interval: 0.1, batchMax: 8,
+        onEnter: (batch) => {
+          batch.sort(readingOrder);
+          batch.forEach((ph, i) => {
+            const img = ph.querySelector('.photo-img');
+            const parts = [ph, img];
+            lock(parts);
+            gsap.timeline({ delay: i * 0.08, onComplete: () => unlock(parts) })
+              .to(ph, { clipPath: 'inset(0% 0% 0% 0% round 12px)', opacity: 1, y: 0, duration: 1.3, ease: 'expo.out', clearProps: 'clipPath,transform,opacity' })
+              .to(img, { scale: 1, rotate: 0, duration: 1.7, ease: 'expo.out', clearProps: 'transform' }, 0)
+              .to(ph.querySelectorAll('.photo-slot-top, .photo-slot-bottom'), { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', clearProps: 'transform' }, 0.5);
+          });
+        }
+      });
+    }
+
+    // ---- COMPARISON: boxes swing in from both sides, rows tick in, FramingX glows ----
+    const compSection = document.getElementById('comparison');
+    if (compSection) {
+      const boxL = compSection.querySelector('.box-traditional');
+      const boxR = compSection.querySelector('.box-framingx');
+      const grid = compSection.querySelector('.comp-clean-grid');
+      if (boxL && boxR && grid) {
+        const rowsL = boxL.querySelectorAll('.comp-box-title, .comp-text-row');
+        const rowsR = boxR.querySelectorAll('.comp-box-title, .comp-text-row');
+        const stacked = () => getComputedStyle(grid).gridTemplateColumns.split(' ').length < 2;
+        const tl = gsap.timeline({ scrollTrigger: { trigger: grid, start: 'top 85%', once: true } });
+        tl.fromTo(boxL,
+          { opacity: 0, x: () => stacked() ? 0 : -90, y: () => stacked() ? 50 : 0, rotateY: () => stacked() ? 0 : 22, transformPerspective: 1100 },
+          { opacity: 1, x: 0, y: 0, rotateY: 0, duration: 1.3, ease: 'expo.out', clearProps: 'transform' })
+          .fromTo(boxR,
+          { opacity: 0, x: () => stacked() ? 0 : 90, y: () => stacked() ? 50 : 0, rotateY: () => stacked() ? 0 : -22, transformPerspective: 1100 },
+          { opacity: 1, x: 0, y: 0, rotateY: 0, duration: 1.3, ease: 'expo.out', clearProps: 'transform' }, 0.12)
+          .fromTo(rowsL, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'expo.out', clearProps: 'transform' }, 0.45)
+          .fromTo(rowsR, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'expo.out', clearProps: 'transform' }, 0.6)
+          .add(() => boxR.classList.add('comp-glow-pulse'), 1.1);
+      }
+    }
+
+    // ---- SERVICES: cards flip up in 3D, icons spin-pop ----
+    const servSection = document.getElementById('services');
+    if (servSection) {
+      const cards = Array.from(servSection.querySelectorAll('.service-clean-card'));
+      cards.forEach(c => {
+        gsap.set(c, { opacity: 0, y: 90, rotateX: -32, transformPerspective: 1000, transformOrigin: '50% 0%' });
+        gsap.set(c.querySelector('.service-icon-wrap'), { scale: 0.3, rotate: -120, opacity: 0 });
+        gsap.set(c.querySelectorAll('.service-card-title, .service-card-desc'), { opacity: 0, y: 16 });
+      });
+      ScrollTrigger.batch(cards, {
+        start: 'top 90%', once: true, interval: 0.1,
+        onEnter: (batch) => {
+          batch.sort(readingOrder);
+          batch.forEach((c, i) => {
+            const icon = c.querySelector('.service-icon-wrap');
+            const parts = [c, icon];
+            lock(parts);
+            gsap.timeline({ delay: i * 0.12, onComplete: () => unlock(parts) })
+              .to(c, { opacity: 1, y: 0, rotateX: 0, duration: 1.3, ease: 'expo.out', clearProps: 'transform' })
+              .to(icon, { scale: 1, rotate: 0, opacity: 1, duration: 1, ease: 'back.out(2)', clearProps: 'transform' }, 0.35)
+              .to(c.querySelectorAll('.service-card-title, .service-card-desc'), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: 'expo.out', clearProps: 'transform' }, 0.45);
+          });
+        }
+      });
+    }
+
+    // ---- PROCESS: cards wipe open left-to-right, step numbers punch in ----
+    const procSection = document.getElementById('process');
+    if (procSection) {
+      const steps = Array.from(procSection.querySelectorAll('.roadmap-step-card'));
+      steps.forEach(st => {
+        gsap.set(st, { clipPath: 'inset(0% 100% 0% 0% round 16px)', x: -30 });
+        gsap.set(st.querySelector('.step-num'), { opacity: 0, scale: 2.4, filter: 'blur(6px)' });
+        gsap.set(st.querySelectorAll('.step-title, .step-desc'), { opacity: 0, y: 16 });
+      });
+      ScrollTrigger.batch(steps, {
+        start: 'top 90%', once: true, interval: 0.1,
+        onEnter: (batch) => {
+          batch.sort(readingOrder);
+          batch.forEach((st, i) => {
+            lock([st]);
+            gsap.timeline({ delay: i * 0.2, onComplete: () => unlock([st]) })
+              .to(st, { clipPath: 'inset(0% 0% 0% 0% round 16px)', x: 0, duration: 1.2, ease: 'expo.inOut', clearProps: 'clipPath,transform' })
+              .to(st.querySelector('.step-num'), { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.9, ease: 'expo.out', clearProps: 'transform,filter' }, 0.45)
+              .to(st.querySelectorAll('.step-title, .step-desc'), { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: 'expo.out', clearProps: 'transform' }, 0.55);
+          });
+        }
+      });
+    }
+
+    // ---- FAQ: questions glide in from alternating sides ----
+    const faqSection = document.getElementById('faq');
+    if (faqSection) {
+      const items = Array.from(faqSection.querySelectorAll('.faq-accordion-item'));
+      gsap.set(items, { opacity: 0, x: (i) => (i % 2 ? 60 : -60), filter: 'blur(6px)' });
+      ScrollTrigger.batch(items, {
+        start: 'top 94%', once: true, interval: 0.08,
+        onEnter: (batch) => {
+          lock(batch);
+          gsap.to(batch, { opacity: 1, x: 0, filter: 'blur(0px)', duration: 1.1, stagger: 0.08, ease: 'expo.out', clearProps: 'transform,filter', onComplete: () => unlock(batch) });
+        }
+      });
+    }
+
+    // ---- CONTACT: card irises open, heading rises, buttons pop ----
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      const card = contactSection.querySelector('.book-call-card');
+      if (card) {
+        const btns = card.querySelectorAll('.btn-book-call, .btn-whatsapp-secondary');
+        gsap.set(card, { clipPath: 'inset(18% 12% 18% 12% round 20px)', scale: 0.92, opacity: 0 });
+        gsap.set(btns, { opacity: 0, y: 24, scale: 0.85 });
+        const headTl = animateHeading(card, { titleSel: '.book-call-title', subSel: '.book-call-subtext', paused: true });
+        gsap.timeline({ scrollTrigger: { trigger: card, start: 'top 85%', once: true } })
+          .to(card, { clipPath: 'inset(0% 0% 0% 0% round 20px)', scale: 1, opacity: 1, duration: 1.4, ease: 'expo.out', clearProps: 'clipPath,transform' })
+          .add(() => headTl && headTl.play(), 0.25)
+          .to(btns, { opacity: 1, y: 0, scale: 1, duration: 0.9, stagger: 0.12, ease: 'back.out(1.8)', clearProps: 'transform',
+                      onStart: () => lock(Array.from(btns)), onComplete: () => unlock(Array.from(btns)) }, 0.75)
+          .add(() => card.classList.add('book-card-glow'), 1.3);
+      }
+    }
+
+    // ---- FOOTER: columns rise, links slide in one by one ----
+    if (footer) {
+      const cols = footer.querySelectorAll('.footer-brand-col, .contact-col');
+      const links = footer.querySelectorAll('.contact-btn-link, .contact-text-item');
+      gsap.set(cols, { opacity: 0, y: 40 });
+      gsap.set(links, { opacity: 0, x: -16 });
+      gsap.timeline({ scrollTrigger: { trigger: footer, start: 'top 92%', once: true } })
+        .to(cols, { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, ease: 'expo.out', clearProps: 'transform' })
+        .to(links, { opacity: 1, x: 0, duration: 0.7, stagger: 0.05, ease: 'expo.out', clearProps: 'transform' }, 0.3);
+    }
+  }
+
+  // =========================================================================
+  // AI MOTION GRAPHIC EDITS: play behaviour + modal
+  // =========================================================================
+  const motionEdits = [
+    { id: 'me-1', title: 'SonicScale Media', category: 'AI Motion Graphic Edit · Brand Promo', videoSrc: 'assets/motion-edits/motion-edit-1.mp4', poster: 'assets/motion-edits/motion-edit-1.webp', vertical: true },
+    { id: 'me-2', title: 'AI Ads Explained', category: 'AI Motion Graphic Edit · Ad Explainer', videoSrc: 'assets/motion-edits/motion-edit-2.mp4', poster: 'assets/motion-edits/motion-edit-2.webp', vertical: true },
+    { id: 'me-3', title: '3 Beginner Mistakes', category: 'AI Motion Graphic Edit · Talking Head', videoSrc: 'assets/motion-edits/motion-edit-3.mp4', poster: 'assets/motion-edits/motion-edit-3.webp', vertical: true },
+    { id: 'me-4', title: 'Swaadly: Sold Out', category: 'AI Motion Graphic Edit · UGC Product', videoSrc: 'assets/motion-edits/motion-edit-4.mp4', poster: 'assets/motion-edits/motion-edit-4.webp', vertical: true }
+  ];
+
+  function initMotionEdits() {
+    const track = document.getElementById('motion-edits-track');
+    if (!track) return;
+    const cards = Array.from(track.querySelectorAll('.motion-edit-card'));
+    const dots = Array.from(document.querySelectorAll('#motion-dots span'));
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    const play = (card) => {
+      const v = card.querySelector('.motion-video');
+      if (!v) return;
+      if (v.getAttribute('preload') === 'none') v.setAttribute('preload', 'auto');
+      card.classList.add('is-playing');
+      v.play().catch(() => {});
+    };
+    const stop = (card) => {
+      const v = card.querySelector('.motion-video');
+      card.classList.remove('is-playing');
+      if (v) v.pause();
+    };
+
+    cards.forEach((card, i) => {
+      const open = () => {
+        cards.forEach(stop);
+        openVideoModal(motionEdits[i], motionEdits);
+      };
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+      if (canHover) {
+        card.addEventListener('mouseenter', () => play(card));
+        card.addEventListener('mouseleave', () => stop(card));
+      }
+    });
+
+    // Touch screens: the card in the middle of the swipe row plays silently
+    if (!canHover && 'IntersectionObserver' in window) {
+      const ratios = new Map();
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => ratios.set(en.target, en.isIntersecting ? en.intersectionRatio : 0));
+        let best = null, bestR = 0.6;
+        ratios.forEach((r, el) => { if (r > bestR) { best = el; bestR = r; } });
+        cards.forEach(c => (c === best ? play(c) : stop(c)));
+      }, { threshold: [0, 0.6, 0.8, 1] });
+      cards.forEach(c => io.observe(c));
+    }
+
+    // Swipe dots (phones)
+    if (dots.length) {
+      let raf = null;
+      track.addEventListener('scroll', () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = null;
+          const mid = track.scrollLeft + track.clientWidth / 2;
+          let idx = 0, best = Infinity;
+          cards.forEach((c, i) => {
+            const d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid);
+            if (d < best) { best = d; idx = i; }
+          });
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        });
+      }, { passive: true });
     }
   }
 
@@ -842,7 +1344,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Video Modal / Lightbox
-  function openVideoModal(video) {
+  function openVideoModal(video, list) {
+    videoModal.classList.toggle('is-vertical', !!video.vertical);
+    const shelfTitle = videoModal.querySelector('.shelf-title');
+    if (shelfTitle) shelfTitle.textContent = video.vertical ? 'MORE MOTION EDITS' : 'ALL COMMERCIALS';
+    modalActiveVideo.style.visibility = '';
     modalActiveVideo.src = video.videoSrc;
     modalActiveVideo.poster = video.poster || '';
     modalVideoTitle.textContent = video.title;
@@ -850,7 +1356,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate shelf with all commercial projects
     modalShelfItems.innerHTML = '';
-    const allProjects = [...videoProjects, ...newCommercialProjects];
+    const allProjects = list || [...videoProjects, ...newCommercialProjects];
     allProjects.forEach(v => {
       const thumb = document.createElement('div');
       thumb.className = `shelf-thumb-item ${v.id === video.id ? 'active' : ''}`;
@@ -860,7 +1366,7 @@ document.addEventListener('DOMContentLoaded', () => {
         thumb.innerHTML = `<video src="${v.videoSrc}#t=0.1" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;pointer-events:none;"></video>`;
       }
       thumb.title = v.title;
-      thumb.addEventListener('click', () => openVideoModal(v));
+      thumb.addEventListener('click', () => openVideoModal(v, list));
       modalShelfItems.appendChild(thumb);
     });
 
@@ -872,7 +1378,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function closeVideoModal() {
     videoModal.classList.remove('active');
     modalActiveVideo.pause();
-    modalActiveVideo.src = '';
+    // Looks the same as before (black player while the pop-up fades out), but the video is
+    // released after the frame paints, and without requesting the page itself as a "video".
+    modalActiveVideo.style.visibility = 'hidden';
+    setTimeout(() => {
+      if (videoModal.classList.contains('active')) return;
+      modalActiveVideo.removeAttribute('src');
+      modalActiveVideo.removeAttribute('poster');
+      modalActiveVideo.load();
+    }, 400);
     if (commercialsModal && commercialsModal.classList.contains('active')) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -1226,7 +1740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!photoLightboxModal) return;
     photoLightboxModal.classList.remove('active');
     document.body.style.overflow = '';
-    if (lightboxImg) lightboxImg.src = '';
+    if (lightboxImg) lightboxImg.removeAttribute('src');
   }
 
   document.querySelectorAll('.photo-slot').forEach(slot => {
@@ -1472,10 +1986,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event Listeners (Consolidated & Debounced ~150ms Resize)
   let resizeDebounceTimer = null;
 
+  let lastResizeWidth = window.innerWidth;
+
   function handleWindowResize() {
+    // Phones fire 'resize' when the address bar shows/hides while scrolling.
+    // Rebuilding the pin then makes the page jump, so skip height-only changes on touch.
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch && window.innerWidth === lastResizeWidth) return;
+    lastResizeWidth = window.innerWidth;
+
     if (resizeDebounceTimer) clearTimeout(resizeDebounceTimer);
     resizeDebounceTimer = setTimeout(() => {
-      if (!isMobileLayout() && loadedCount === 0) {
+      if (loadedCount === 0) {
         preloadFrames();
       }
       resizeCanvas();
@@ -1497,15 +2019,164 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('orientationchange', handleWindowResize, { passive: true });
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  // Init Engine
-  if (isMobileLayout()) {
-    dismissLoader();
-  } else {
-    resizeCanvas();
-    preloadFrames();
-    initHeroScrollPin();
+  // =========================================================================
+  // BUTTERY SMOOTH SCROLL (Lenis synced to GSAP ScrollTrigger, like iNSITERS)
+  // =========================================================================
+  function initSmoothScroll() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || typeof Lenis === 'undefined' || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
+      anchors: { offset: -70 }
+    });
+    window.lenis = lenis;
+
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+
+    // Popups scroll on their own; pause page scrolling while one is open
+    document.querySelectorAll('.modal-backdrop').forEach((m) => m.setAttribute('data-lenis-prevent', ''));
+    new MutationObserver(() => {
+      if (document.body.style.overflow === 'hidden') lenis.stop();
+      else lenis.start();
+    }).observe(document.body, { attributes: true, attributeFilter: ['style'] });
   }
+
+  if (typeof ScrollTrigger !== 'undefined') {
+    ScrollTrigger.config({ ignoreMobileResize: true });
+  }
+  initSmoothScroll();
+
+  // Logo / Home always return to the very top (the pinned hero confuses normal anchor jumps)
+  document.querySelectorAll('a[href="#hero"]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.lenis) window.lenis.scrollTo(0, { duration: 1.4 });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // Init Engine (desktop + phones)
+  resizeCanvas();
+  preloadFrames();
+  initHeroScrollPin();
   initVideoLazyLoading();
+  initMotionEdits();
+
+  // =========================================================================
+  // ACCESSIBILITY (keyboard + screen readers). Purely behavioural: no visual change.
+  // =========================================================================
+  (function initAccessibility() {
+    // Pop-ups are announced as dialogs
+    const dialogLabels = {
+      'video-modal': 'Video player',
+      'commercials-gallery-modal': 'All commercials',
+      'gallery-modal': 'Photography gallery',
+      'photo-lightbox-modal': 'Photo lightbox'
+    };
+    Object.keys(dialogLabels).forEach((id) => {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.setAttribute('role', 'dialog');
+      m.setAttribute('aria-modal', 'true');
+      if (!m.getAttribute('aria-label')) m.setAttribute('aria-label', dialogLabels[id]);
+    });
+
+    // Video and photo tiles can be opened with the keyboard (Enter / Space)
+    const TILE_SEL = '.bento-slot, .photo-slot, .shelf-thumb-item';
+    const makeOperable = (el) => {
+      if (el.dataset.kbd) return;
+      el.dataset.kbd = '1';
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+      if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+      // name comes from the tile's own visible text (matches what sighted users see)
+      if (!el.textContent.trim() && !el.getAttribute('aria-label')) {
+        const label = el.getAttribute('data-title') || el.getAttribute('title') || (el.querySelector('img') && el.querySelector('img').alt) || '';
+        if (label) el.setAttribute('aria-label', label);
+      }
+    };
+    const scan = (root) => {
+      if (root.matches && root.matches(TILE_SEL)) makeOperable(root);
+      if (root.querySelectorAll) root.querySelectorAll(TILE_SEL).forEach(makeOperable);
+    };
+    scan(document);
+    new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => n.nodeType === 1 && scan(n))))
+      .observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const el = e.target;
+      if (el && el.dataset && el.dataset.kbd === '1') {
+        e.preventDefault();
+        el.click();
+      }
+    });
+
+    // Focus moves into an opened pop-up, stays inside it, and returns afterwards
+    const focusables = (root) => Array.from(root.querySelectorAll(
+      'a[href], button:not([disabled]), video[controls], [tabindex]:not([tabindex="-1"])'
+    )).filter((el) => el.offsetParent !== null || el === document.activeElement);
+    const lastFocus = new Map();
+    document.querySelectorAll('.modal-backdrop').forEach((modal) => {
+      let wasActive = modal.classList.contains('active');
+      new MutationObserver(() => {
+        const isActive = modal.classList.contains('active');
+        if (isActive === wasActive) return;
+        wasActive = isActive;
+        if (isActive) {
+          lastFocus.set(modal, document.activeElement);
+          const closeBtn = modal.querySelector('.modal-close-btn') || focusables(modal)[0];
+          // the pop-up fades in, so keep trying briefly until it can take focus
+          let tries = 0;
+          const tryFocus = () => {
+            if (!modal.classList.contains('active') || !closeBtn) return;
+            closeBtn.focus({ preventScroll: true });
+            if (!modal.contains(document.activeElement) && ++tries < 12) setTimeout(tryFocus, 60);
+          };
+          setTimeout(tryFocus, 30);
+        } else {
+          const prev = lastFocus.get(modal);
+          const anotherOpen = document.querySelector('.modal-backdrop.active');
+          if (prev && prev.focus && !anotherOpen) prev.focus({ preventScroll: true });
+        }
+      }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const open = Array.from(document.querySelectorAll('.modal-backdrop.active')).pop();
+      if (!open) return;
+      const items = focusables(open);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !open.contains(document.activeElement))) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !open.contains(document.activeElement))) {
+        e.preventDefault(); first.focus();
+      }
+    });
+
+    // FAQ buttons describe the panel they control
+    document.querySelectorAll('.faq-accordion-item').forEach((item, i) => {
+      const btn = item.querySelector('.faq-trigger');
+      const panel = item.querySelector('.faq-content');
+      if (!btn || !panel) return;
+      if (!panel.id) panel.id = 'faq-panel-' + (i + 1);
+      btn.setAttribute('aria-controls', panel.id);
+    });
+  })();
+
+  // Videos are view-only: no right-click "Save video as..." on any video
+  document.addEventListener('contextmenu', (e) => {
+    if (e.target && e.target.tagName === 'VIDEO') e.preventDefault();
+  });
   initNavObserver();
   initHeroCanvasObserver();
   updateActiveNav();

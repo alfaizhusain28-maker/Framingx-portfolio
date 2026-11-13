@@ -2062,22 +2062,23 @@ body {
    - All portfolio sections visible in natural scroll order
    ========================================================================== */
 @media (max-width: 768px) {
-  /* Disable persistent fixed canvas on mobile */
+  /* Scroll animation canvas stays on for phones (pinned hero scrub) */
   .global-canvas-wrap {
-    display: none !important;
+    display: block !important;
   }
 
   /* Mobile Hero Section (Plain Dark Background, No Photo) */
   .hero-scroll-track {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 75vh !important;
+    position: relative;
+    width: 100%;
+    height: 100vh !important;
+    height: 100lvh !important;
+    min-height: 0 !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
-    background: #050507 !important;
+    justify-content: flex-end !important;
+    background: transparent !important;
   }
 
   /* Remove static hero image completely on mobile */
@@ -2095,13 +2096,14 @@ body {
     position: relative !important;
     z-index: 2 !important;
     width: 100% !important;
-    min-height: 75vh !important;
-    height: auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;
     align-items: flex-start !important;
-    padding: 100px 1.25rem 45px 1.25rem !important;
+    padding: 100px 1.25rem calc(36px + env(safe-area-inset-bottom)) 1.25rem !important;
+    background: linear-gradient(to top, rgba(5, 5, 7, 0.92) 0%, rgba(5, 5, 7, 0.55) 30%, rgba(5, 5, 7, 0) 55%) !important;
     gap: 1.5rem !important;
     box-sizing: border-box !important;
     pointer-events: auto !important;
@@ -2384,4 +2386,477 @@ body {
     flex-direction: column;
     gap: 2rem;
   }
+}
+
+
+/* --------------------------------------------------------------------------
+   Lenis Smooth Scroll (buttery scrolling, synced with GSAP ScrollTrigger)
+   -------------------------------------------------------------------------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+html.lenis {
+  scroll-behavior: auto !important;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Cleanup fixes (spacing + mobile nav + mobile comparison)
+   -------------------------------------------------------------------------- */
+/* Desktop: remove oversized empty gaps between sections */
+@media (min-width: 901px) {
+  .section-block {
+    padding: 80px 0;
+  }
+}
+
+/* Phones: keep the navbar on one clean line */
+@media (max-width: 600px) {
+  .nav-logo,
+  .logo-name,
+  .pill-btn.nav-pill {
+    white-space: nowrap;
+  }
+
+  /* Logo already links to the top, so "Home" is hidden to free space */
+  .nav-menu .nav-item[href="#hero"] {
+    display: none;
+  }
+
+  .nav-menu {
+    gap: 0.9rem;
+  }
+
+  /* Comparison boxes stacked, so values don't wrap into narrow columns */
+  .comp-clean-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    max-width: 440px;
+  }
+
+  .comp-clean-box {
+    padding: 18px 18px;
+  }
+
+  .comp-row-val {
+    text-align: right;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Work Section: cinematic entrance
+   -------------------------------------------------------------------------- */
+#work.section-block {
+  overflow: hidden;
+}
+
+#work > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.work-ambient-glow {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  width: min(1100px, 120vw);
+  height: 70%;
+  margin-left: calc(min(1100px, 120vw) / -2);
+  background: radial-gradient(ellipse at center, rgba(230, 57, 70, 0.16) 0%, rgba(230, 57, 70, 0.05) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  will-change: opacity, transform;
+}
+
+#work .section-title .sr-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+#work .section-title .sr-word-inner {
+  display: inline-block;
+  transform-origin: 0% 100%;
+}
+
+.bento-slot .tile-reveal-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(105deg,
+    transparent 35%,
+    rgba(255, 42, 68, 0.28) 46%,
+    rgba(255, 255, 255, 0.32) 50%,
+    rgba(255, 42, 68, 0.28) 54%,
+    transparent 65%);
+  mix-blend-mode: screen;
+}
+
+.work-btn-glow {
+  animation: workBtnGlow 1.6s ease-out 1;
+}
+
+@keyframes workBtnGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.55); }
+  100% { box-shadow: 0 0 0 18px rgba(230, 57, 70, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   Premium entrances (all sections)
+   -------------------------------------------------------------------------- */
+/* Hover transitions paused while GSAP animates an element (keeps motion silky) */
+.anim-lock {
+  transition: none !important;
+}
+
+.section-title .sr-word,
+.book-call-title .sr-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.section-title .sr-word-inner,
+.book-call-title .sr-word-inner {
+  display: inline-block;
+  transform-origin: 0% 100%;
+}
+
+#comparison .comp-clean-grid {
+  perspective: 1100px;
+}
+
+.comp-glow-pulse {
+  animation: compGlowPulse 1.8s ease-out 1;
+}
+
+@keyframes compGlowPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.5), 0 0 0 rgba(230, 57, 70, 0); }
+  40%  { box-shadow: 0 0 0 10px rgba(230, 57, 70, 0.12), 0 0 40px rgba(230, 57, 70, 0.35); }
+  100% { box-shadow: 0 0 0 18px rgba(230, 57, 70, 0), 0 0 0 rgba(230, 57, 70, 0); }
+}
+
+.book-card-glow {
+  animation: compGlowPulse 2s ease-out 1;
+}
+
+/* --------------------------------------------------------------------------
+   AI Motion Graphic Edits (vertical reel showcase)
+   -------------------------------------------------------------------------- */
+#motion-edits {
+  position: relative;
+}
+
+.motion-edits-track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 0 6px;
+}
+
+.motion-edit-card {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.45s var(--ease-cinematic);
+}
+
+.motion-phone {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: 26px;
+  overflow: hidden;
+  background: #0b0b0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.03), 0 24px 50px rgba(0, 0, 0, 0.55);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  isolation: isolate;
+}
+
+/* phone notch */
+.motion-phone::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 64px;
+  height: 18px;
+  margin-left: -32px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.motion-poster,
+.motion-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.motion-poster {
+  z-index: 1;
+  transition: opacity 0.35s ease, transform 0.6s var(--ease-cinematic);
+}
+
+.motion-video {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.motion-edit-card.is-playing .motion-video {
+  opacity: 1;
+}
+
+.motion-edit-card.is-playing .motion-poster {
+  opacity: 0;
+}
+
+.motion-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.4rem 1rem 1.1rem;
+  background: linear-gradient(180deg, rgba(5, 5, 7, 0.45) 0%, rgba(5, 5, 7, 0) 26%, rgba(5, 5, 7, 0) 52%, rgba(5, 5, 7, 0.9) 100%);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.motion-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 0.3rem;
+}
+
+.motion-desc {
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.68);
+  margin-bottom: 0.75rem;
+}
+
+.motion-play-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(230, 57, 70, 0.9);
+  padding: 0.38rem 0.75rem;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(230, 57, 70, 0.35);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-edit-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .motion-edit-card:hover .motion-phone {
+    border-color: rgba(255, 42, 68, 0.5);
+    box-shadow: 0 0 0 5px rgba(255, 42, 68, 0.08), 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 34px rgba(255, 42, 68, 0.22);
+  }
+
+  /* while the clip plays, the text steps back so the edit is the focus */
+  .motion-edit-card.is-playing .motion-overlay {
+    opacity: 0.25;
+  }
+}
+
+.motion-edit-card:focus-visible .motion-phone {
+  border-color: var(--accent-red);
+}
+
+.motion-dots {
+  display: none;
+}
+
+/* Tablet: 2 x 2 */
+@media (max-width: 960px) and (min-width: 769px) {
+  .motion-edits-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 620px;
+  }
+}
+
+/* Phones: swipeable row with snap + dots */
+@media (max-width: 768px) {
+  .below-hero-container #motion-edits { order: 1; }
+
+  .motion-edits-track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin: 0 -1.25rem;
+    padding: 10px 1.25rem 8px;
+    scroll-padding: 0 1.25rem;
+  }
+
+  .motion-edits-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .motion-edit-card {
+    flex: 0 0 72%;
+    scroll-snap-align: center;
+  }
+
+  .motion-dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 16px;
+  }
+
+  .motion-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    transition: width 0.35s var(--ease-cinematic), background 0.35s ease;
+  }
+
+  .motion-dots span.active {
+    width: 20px;
+    background: var(--accent-red);
+  }
+}
+
+/* Video modal: vertical (9:16) mode for motion edits */
+.modal-backdrop.is-vertical .modal-video-dialog {
+  width: min(460px, 92vw);
+  padding: 1.6rem;
+}
+
+.modal-backdrop.is-vertical .modal-player-container {
+  aspect-ratio: 9 / 16;
+  width: min(100%, calc(66vh * 9 / 16));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.modal-backdrop.is-vertical .modal-player-container video {
+  object-fit: cover;
+}
+
+.modal-backdrop.is-vertical .shelf-thumb-item {
+  aspect-ratio: 9 / 16;
+}
+
+/* New service card (spans the full row, links to the edits) */
+.service-card-featured {
+  grid-column: 1 / -1;
+  text-decoration: none;
+  border-color: rgba(230, 57, 70, 0.32);
+  background: radial-gradient(circle at 0% 0%, rgba(230, 57, 70, 0.1) 0%, rgba(14, 14, 18, 0.6) 55%);
+}
+
+.service-new-badge {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: #fff;
+  background: var(--accent-red);
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(230, 57, 70, 0.45);
+}
+
+.service-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-red-bright, #ff4d5e);
+  transition: gap 0.3s var(--ease-cinematic);
+}
+
+.service-card-featured:hover .service-card-link {
+  gap: 0.7rem;
+}
+
+.modal-backdrop.is-vertical .shelf-thumbnails-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+/* Motion edit info sits under the phone so the edit itself stays clean */
+.motion-overlay {
+  background: linear-gradient(180deg, rgba(5, 5, 7, 0.5) 0%, rgba(5, 5, 7, 0) 22%);
+}
+
+.motion-bottom {
+  padding: 14px 4px 0;
+}
+
+.motion-bottom .motion-title {
+  font-size: 1rem;
+}
+
+.motion-bottom .motion-desc {
+  color: #888898;
+  margin-bottom: 0.7rem;
+}
+
+.motion-bottom .motion-play-pill {
+  background: transparent;
+  color: var(--accent-red-bright, #ff4d5e);
+  box-shadow: none;
+  padding: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .motion-edit-card.is-playing .motion-overlay {
+    opacity: 0;
+  }
+}
+
+/* Fix: the two link cards (Motion Edits, Website Creation) could flash black / disappear in Chrome
+   when tapped, because a blurred card inside an already-blurred section is re-drawn while the page
+   starts scrolling. Their own blur adds nothing visible over the dark section, so it is removed here. */
+.service-card-featured {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

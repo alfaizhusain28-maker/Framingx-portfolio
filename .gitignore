@@ -22,3 +22,21 @@ Protein shake.mp4
 scratch/
 .system_generated/
 .python_modules/
+
+# Original full-size motion graphic edits (web copies live in assets/motion-edits)
+Ai edit Motion graphics/
+
+# Secrets / local env (never commit)
+.env
+.env.*
+*.pem
+*.key
+
+# Audit rollback snapshots and test output
+.rollback/
+tests/node_modules/
+tests/results/
+
+# Ready-to-upload copy of the site
+FramingX-upload/
+GitHub-upload/
