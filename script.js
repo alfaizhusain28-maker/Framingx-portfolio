@@ -235,6 +235,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${encodeURI(folder)}/frame_${num}_${sec}s.webp`;
   }
 
+  // Safari/iPhone fix: img.decode() can stay pending forever in WebKit, which used to stall the
+  // frame loader and leave the hero stuck on one picture. Continue after 400 ms at most; calls once.
+  function safeDecode(img, done) {
+    let called = false;
+    const finish = () => { if (!called) { called = true; done(); } };
+    if (img.decode) {
+      img.decode().then(finish, finish);
+      setTimeout(finish, 400);
+    } else {
+      finish();
+    }
+  }
+
   // Preload frames with background off-thread decoding for zero stutter during scrub
   function preloadFrames() {
     const firstImg = new Image();
@@ -249,11 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startAnimationLoopIfNeeded();
         loadInitialBatch();
       };
-      if (firstImg.decode) {
-        firstImg.decode().then(onDone).catch(onDone);
-      } else {
-        onDone();
-      }
+      safeDecode(firstImg, onDone);
     };
     firstImg.onerror = () => {
       console.warn('Failed to load initial frame:', firstImg.src);
@@ -281,11 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       img.onload = () => {
-        if (img.decode) {
-          img.decode().then(onDone).catch(onDone);
-        } else {
-          onDone();
-        }
+        safeDecode(img, onDone);
       };
       img.onerror = () => {
         onDone();
@@ -325,11 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         img.onload = () => {
-          if (img.decode) {
-            img.decode().then(onFrameDone).catch(onFrameDone);
-          } else {
-            onFrameDone();
-          }
+          safeDecode(img, onFrameDone);
         };
         img.onerror = () => {
           onFrameDone();
