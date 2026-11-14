@@ -298,51 +298,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Progressively stream remaining frames (19 to 81) in small chunks via requestIdleCallback
+  // Progressively stream remaining frames (19 to 81).
+  // Safari fix: frames load in a rolling queue (up to 8 at once). Each frame is independent and has
+  // its own watchdog, so one slow/missing image can never block the rest (that used to leave the
+  // hero stuck around frame 18 on iPhone Safari).
   function startProgressiveFrameLoading(startIdx) {
     if (isProgressiveLoadingStarted) return;
     isProgressiveLoadingStarted = true;
 
+    const MAX_IN_FLIGHT = 8;
     let nextIdx = startIdx;
-    const CHUNK_SIZE = 6;
+    let inFlight = 0;
 
-    function loadNextChunk() {
-      if (nextIdx > FRAME_COUNT) return;
+    function loadFrame(i, attempt) {
+      inFlight++;
+      const img = new Image();
+      img.decoding = 'async';
+      let settled = false;
+      const settle = (ok) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(watchdog);
+        if (ok) images[i] = img;
+        inFlight--;
+        if (!ok && attempt < 2) {
+          // retry once, a bit later
+          setTimeout(() => loadFrame(i, attempt + 1), 300);
+        } else {
+          pump();
+        }
+      };
+      const watchdog = setTimeout(() => settle(img.complete && img.naturalWidth > 0), 10000);
+      img.onload = () => {
+        // warm up decoding in the background; never wait for it (WebKit can leave it pending)
+        if (img.decode) img.decode().catch(() => {});
+        settle(true);
+      };
+      img.onerror = () => settle(false);
+      images[i] = images[i] || img;
+      img.src = getFramePath(i);
+    }
 
-      const endIdx = Math.min(FRAME_COUNT, nextIdx + CHUNK_SIZE - 1);
-      let chunkRemaining = endIdx - nextIdx + 1;
-
-      for (let i = nextIdx; i <= endIdx; i++) {
-        const img = new Image();
-        img.src = getFramePath(i);
-        images[i] = img;
-
-        const onFrameDone = () => {
-          chunkRemaining--;
-          if (chunkRemaining <= 0) {
-            nextIdx = endIdx + 1;
-            if ('requestIdleCallback' in window) {
-              requestIdleCallback(loadNextChunk, { timeout: 120 });
-            } else {
-              setTimeout(loadNextChunk, 25);
-            }
-          }
-        };
-
-        img.onload = () => {
-          safeDecode(img, onFrameDone);
-        };
-        img.onerror = () => {
-          onFrameDone();
-        };
+    function pump() {
+      while (inFlight < MAX_IN_FLIGHT && nextIdx <= FRAME_COUNT) {
+        loadFrame(nextIdx++, 1);
       }
     }
 
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(loadNextChunk, { timeout: 120 });
-    } else {
-      setTimeout(loadNextChunk, 30);
-    }
+    pump();
   }
 
   function dismissLoader() {
